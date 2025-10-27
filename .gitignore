@@ -2,6 +2,10 @@
 # Java / Spring Boot .gitignore
 # =========================
 
+
+set-env.sh
+set-env.fish
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
