@@ -1,0 +1,147 @@
+# =========================
+# Java / Spring Boot .gitignore
+# =========================
+
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+
+# Compilados de Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# Diretórios de build
+/target/
+/build/
+/out/
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# Configurações do sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDEs
+## IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+## Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+bin/
+
+## NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Arquivos do Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Arquivos do Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Arquivos de ambiente
+.env
+.env.*
+application-*.yml
+application-*.yaml
+application-*.properties
+
+# Cache de dependências
+dependency-reduced-pom.xml
+
+# Test reports
+/test-output/
+/surefire-reports/
+/jacoco.exec
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# VS Code
+.vscode/
+
+# Arquivos de segurança / credenciais
+*.key
+*.pem
+*.crt
+
+# Arquivos gerados por IDEs e ferramentas
+*.orig
+*.rej
+*.bak
+*.tmp
+*.swp
+*.swo
+*~
+
+# Arquivos de deploy local
+*.db
+*.h2.db
+*.mv.db
+
+# Arquivos de cobertura e relatórios
+.coverage/
+coverage/
+*.lcov
+*.coverage
+
+# Arquivos do Sonar e outros analisadores
+.sonar/
+report-task.txt
+

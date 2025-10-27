@@ -1,0 +1,27 @@
+name: Integração de codigo
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: '21'
+
+    - name: Build project
+      run: ./mvn clean install -DskipTests
+
+    - name: Run Checkstyle
+      run: ./mvn clean validate
