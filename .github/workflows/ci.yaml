@@ -20,5 +20,11 @@ jobs:
         distribution: temurin
         java-version: '21'
 
-    - name: Build, Lint and Test
-      run: mvn clean verify
+    - name: Build project
+      run: mvn clean compile
+
+    - name: Lint with Checkstyle
+      run: mvn checkstyle:check
+
+    - name: Run tests
+      run: mvn test
