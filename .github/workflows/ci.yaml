@@ -20,8 +20,5 @@ jobs:
         distribution: temurin
         java-version: '21'
 
-    - name: Build project
-      run: ./mvn clean install -DskipTests
-
-    - name: Run Checkstyle
-      run: ./mvn clean validate
+    - name: Build, Lint and Test
+      run: mvn clean verify
