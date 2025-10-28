@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/api/gavetas")
-@Tag(name = "gaveta")
+@Tag(name = "gavetas")
 public class GavetaController {
 
   @Autowired

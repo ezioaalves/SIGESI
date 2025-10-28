@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/api/cemiterios")
-@Tag(name = "cemiterio")
+@Tag(name = "cemiterios")
 public class CemiterioController {
 
   @Autowired
