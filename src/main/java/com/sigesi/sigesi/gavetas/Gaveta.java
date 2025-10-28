@@ -3,7 +3,6 @@ package com.sigesi.sigesi.gavetas;
 import com.sigesi.sigesi.jazigos.Jazigo;
 import com.sigesi.sigesi.pessoas.Pessoa;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
