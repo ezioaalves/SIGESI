@@ -13,7 +13,7 @@ public class SigesiApplication {
     SpringApplication.run(SigesiApplication.class, args);
   }
 
-  @GetMapping("/home")
+  @GetMapping("/")
   public String home() {
     return "Bem-vindo à API Spring Boot!";
   }
