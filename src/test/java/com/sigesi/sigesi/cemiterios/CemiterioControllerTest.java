@@ -106,16 +106,14 @@ class CemiterioControllerTest {
   }
 
     @Test
-    @DisplayName("GET /api/cemiterios/{id} deve lançar exceção quando não encontrado (sem handler global)")
-    void testGetByIdLancaExcecaoQuandoNaoEncontrado() throws Exception {
-        given(cemiterioService.getCemiterioById(999L))
-                .willThrow(new RuntimeException("Cemitério não encontrado com id 999"));
+    @DisplayName("GET /api/cemiterios/{id} deve retornar 404 quando não encontrado")
+    void testGetByIdRetorna404QuandoNaoEncontrado() throws Exception {
+      given(cemiterioService.getCemiterioById(999L))
+          .willThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"));
 
-        org.junit.jupiter.api.Assertions.assertThrows(jakarta.servlet.ServletException.class, () -> {
-            mockMvc.perform(get("/api/cemiterios/{id}", 999L)
-                    .accept(MediaType.APPLICATION_JSON))
-                    .andReturn();
-        });
+      mockMvc.perform(get("/api/cemiterios/{id}", 999L)
+          .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNotFound());
     }
 
   @Test
@@ -228,22 +226,20 @@ class CemiterioControllerTest {
   }
 
     @Test
-    @DisplayName("PUT /api/cemiterios/{id} deve lançar exceção quando cemitério não existe (sem handler global)")
-    void testUpdateLancaExcecaoQuandoNaoEncontrado() throws Exception {
+    @DisplayName("PUT /api/cemiterios/{id} deve retornar 404 quando cemitério não existe")
+    void testUpdateRetorna404QuandoNaoEncontrado() throws Exception {
     var request = Cemiterio.builder()
         .nome("Novo Nome")
         .endereco(Endereco.builder().id(2L).build())
         .build();
 
     given(cemiterioService.updateCemiterio(eq(999L), any(Cemiterio.class)))
-        .willThrow(new RuntimeException("Cemitério não encontrado com id 999"));
+          .willThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"));
 
-        org.junit.jupiter.api.Assertions.assertThrows(jakarta.servlet.ServletException.class, () -> {
-            mockMvc.perform(put("/api/cemiterios/{id}", 999L)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
-                    .andReturn();
-        });
+      mockMvc.perform(put("/api/cemiterios/{id}", 999L)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(objectMapper.writeValueAsString(request)))
+          .andExpect(status().isNotFound());
   }
 
   @Test
@@ -256,14 +252,12 @@ class CemiterioControllerTest {
   }
 
     @Test
-    @DisplayName("DELETE /api/cemiterios/{id} deve lançar exceção quando não encontrado (sem handler global)")
-    void testDeleteLancaExcecaoQuandoNaoEncontrado() throws Exception {
-    doThrow(new RuntimeException("Cemitério não encontrado com id 999"))
-        .when(cemiterioService).deleteCemiterio(999L);
+    @DisplayName("DELETE /api/cemiterios/{id} deve retornar 404 quando não encontrado")
+    void testDeleteRetorna404QuandoNaoEncontrado() throws Exception {
+      doThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"))
+          .when(cemiterioService).deleteCemiterio(999L);
 
-        org.junit.jupiter.api.Assertions.assertThrows(jakarta.servlet.ServletException.class, () -> {
-            mockMvc.perform(delete("/api/cemiterios/{id}", 999L))
-                    .andReturn();
-        });
-  }
+      mockMvc.perform(delete("/api/cemiterios/{id}", 999L))
+          .andExpect(status().isNotFound());
+    }
 }

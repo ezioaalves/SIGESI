@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.EnderecoService;
 
 @Service
@@ -21,8 +22,8 @@ public class CemiterioService {
   }
 
   public Cemiterio getCemiterioById(Long id) {
-    return cemiterioRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Cemitério não encontrado com id " + id));
+  return cemiterioRepository.findById(id)
+    .orElseThrow(() -> new NotFoundException("Cemitério não encontrado com id " + id));
   }
 
   public Cemiterio createCemiterio(Cemiterio cemiterio) {
@@ -33,8 +34,8 @@ public class CemiterioService {
   }
 
   public Cemiterio updateCemiterio(Long id, Cemiterio cemiterioAtualizado) {
-    Cemiterio cemiterio = cemiterioRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Cemitério não encontrado com id " + id));
+  Cemiterio cemiterio = cemiterioRepository.findById(id)
+    .orElseThrow(() -> new NotFoundException("Cemitério não encontrado com id " + id));
 
     cemiterio.setNome(cemiterioAtualizado.getNome());
 
@@ -48,8 +49,8 @@ public class CemiterioService {
   }
 
   public void deleteCemiterio(Long id) {
-    Cemiterio cemiterio = cemiterioRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Cemitério não encontrado com id " + id));
+  Cemiterio cemiterio = cemiterioRepository.findById(id)
+    .orElseThrow(() -> new NotFoundException("Cemitério não encontrado com id " + id));
 
     cemiterioRepository.delete(cemiterio);
   }
