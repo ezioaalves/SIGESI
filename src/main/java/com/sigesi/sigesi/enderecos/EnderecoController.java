@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 /**
  * Controller REST para gerenciamento de endereços.
  */
@@ -37,14 +39,14 @@ public class EnderecoController {
   }
 
   @PostMapping("/")
-  public ResponseEntity<Endereco> createEndereco(@RequestBody Endereco endereco) {
+  public ResponseEntity<Endereco> createEndereco(@Valid @RequestBody Endereco endereco) {
     Endereco novoEndereco = enderecoService.createEndereco(endereco);
     return ResponseEntity.status(HttpStatus.CREATED).body(novoEndereco);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<Endereco> updateEndereco(@PathVariable Long id,
-      @RequestBody Endereco endereco) {
+      @Valid @RequestBody Endereco endereco) {
     Endereco enderecoAtualizado = enderecoService.updateEndereco(id, endereco);
     return ResponseEntity.ok(enderecoAtualizado);
   }
