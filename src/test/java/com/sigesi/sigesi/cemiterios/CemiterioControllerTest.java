@@ -105,16 +105,18 @@ class CemiterioControllerTest {
         .andExpect(jsonPath("$.endereco.id", is(1)));
   }
 
-  @Test
-  @DisplayName("GET /api/cemiterios/{id} deve retornar 500 quando não encontrado")
-  void testGetByIdRetorna500QuandoNaoEncontrado() throws Exception {
-    given(cemiterioService.getCemiterioById(999L))
-        .willThrow(new RuntimeException("Cemitério não encontrado com id 999"));
+    @Test
+    @DisplayName("GET /api/cemiterios/{id} deve lançar exceção quando não encontrado (sem handler global)")
+    void testGetByIdLancaExcecaoQuandoNaoEncontrado() throws Exception {
+        given(cemiterioService.getCemiterioById(999L))
+                .willThrow(new RuntimeException("Cemitério não encontrado com id 999"));
 
-    mockMvc.perform(get("/api/cemiterios/{id}", 999L)
-        .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError()); // sem error handler global
-  }
+        org.junit.jupiter.api.Assertions.assertThrows(jakarta.servlet.ServletException.class, () -> {
+            mockMvc.perform(get("/api/cemiterios/{id}", 999L)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andReturn();
+        });
+    }
 
   @Test
   @DisplayName("POST /api/cemiterios/ deve retornar 201 ao criar com sucesso")
@@ -225,9 +227,9 @@ class CemiterioControllerTest {
         .andExpect(status().isBadRequest());
   }
 
-  @Test
-  @DisplayName("PUT /api/cemiterios/{id} deve retornar 500 quando cemitério não existe")
-  void testUpdateRetorna500QuandoNaoEncontrado() throws Exception {
+    @Test
+    @DisplayName("PUT /api/cemiterios/{id} deve lançar exceção quando cemitério não existe (sem handler global)")
+    void testUpdateLancaExcecaoQuandoNaoEncontrado() throws Exception {
     var request = Cemiterio.builder()
         .nome("Novo Nome")
         .endereco(Endereco.builder().id(2L).build())
@@ -236,10 +238,12 @@ class CemiterioControllerTest {
     given(cemiterioService.updateCemiterio(eq(999L), any(Cemiterio.class)))
         .willThrow(new RuntimeException("Cemitério não encontrado com id 999"));
 
-    mockMvc.perform(put("/api/cemiterios/{id}", 999L)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isInternalServerError());
+        org.junit.jupiter.api.Assertions.assertThrows(jakarta.servlet.ServletException.class, () -> {
+            mockMvc.perform(put("/api/cemiterios/{id}", 999L)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                    .andReturn();
+        });
   }
 
   @Test
@@ -251,13 +255,15 @@ class CemiterioControllerTest {
         .andExpect(status().isNoContent());
   }
 
-  @Test
-  @DisplayName("DELETE /api/cemiterios/{id} deve retornar 500 quando não encontrado")
-  void testDeleteRetorna500QuandoNaoEncontrado() throws Exception {
+    @Test
+    @DisplayName("DELETE /api/cemiterios/{id} deve lançar exceção quando não encontrado (sem handler global)")
+    void testDeleteLancaExcecaoQuandoNaoEncontrado() throws Exception {
     doThrow(new RuntimeException("Cemitério não encontrado com id 999"))
         .when(cemiterioService).deleteCemiterio(999L);
 
-    mockMvc.perform(delete("/api/cemiterios/{id}", 999L))
-        .andExpect(status().isInternalServerError());
+        org.junit.jupiter.api.Assertions.assertThrows(jakarta.servlet.ServletException.class, () -> {
+            mockMvc.perform(delete("/api/cemiterios/{id}", 999L))
+                    .andReturn();
+        });
   }
 }
