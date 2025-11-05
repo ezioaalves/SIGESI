@@ -23,8 +23,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
+import com.sigesi.sigesi.enderecos.dtos.EnderecoResponseDTO;
 
 /**
  * Testes unitários para CemiterioService.
@@ -43,21 +45,30 @@ class CemiterioServiceTest {
   private CemiterioService cemiterioService;
 
   private Cemiterio cemiterioValido;
-  private Endereco enderecoValido;
+  private Endereco enderecoEntityValido;
+  private EnderecoResponseDTO enderecoDtoValido;
 
   @BeforeEach
   void setUp() {
-    enderecoValido = Endereco.builder()
+    enderecoEntityValido = Endereco.builder()
         .id(1L)
         .logradouro("Rua Exemplo")
         .numero("123")
         .bairro("Centro")
         .build();
 
+    enderecoDtoValido = new EnderecoResponseDTO(
+        1L,
+        "Rua Exemplo",
+        "123",
+        "Centro",
+        null // referencia
+    );
+
     cemiterioValido = Cemiterio.builder()
         .id(1L)
         .nome("Cemitério Central")
-        .endereco(enderecoValido)
+        .endereco(enderecoEntityValido)
         .build();
   }
 
@@ -76,16 +87,17 @@ class CemiterioServiceTest {
   @Test
   @DisplayName("Deve retornar lista com cemitérios existentes")
   void testGetAllRetornaListaComCemiterios() {
+    Endereco outroEndereco = Endereco.builder().id(2L).build();
     Cemiterio cemiterio2 = Cemiterio.builder()
         .id(2L)
         .nome("Cemitério Municipal")
-        .endereco(enderecoValido)
+        .endereco(outroEndereco)
         .build();
 
     Cemiterio cemiterio3 = Cemiterio.builder()
         .id(3L)
         .nome("Cemitério Parque")
-        .endereco(enderecoValido)
+        .endereco(outroEndereco)
         .build();
 
     when(cemiterioRepository.findAll())
@@ -112,11 +124,11 @@ class CemiterioServiceTest {
   }
 
   @Test
-  @DisplayName("Deve lançar exceção quando buscar por ID inexistente")
+  @DisplayName("Deve lançar exceção 404 quando buscar por ID inexistente")
   void testGetCemiterioByIdLancaExcecaoQuandoNaoEncontrado() {
     when(cemiterioRepository.findById(999L)).thenReturn(Optional.empty());
 
-    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+    NotFoundException exception = assertThrows(NotFoundException.class, () -> {
       cemiterioService.getCemiterioById(999L);
     });
 
@@ -127,7 +139,7 @@ class CemiterioServiceTest {
   @Test
   @DisplayName("Deve criar cemitério com endereço válido")
   void testCreateCemiterioComSucesso() {
-    when(enderecoService.getEnderecoById(1L)).thenReturn(enderecoValido);
+    when(enderecoService.getEnderecoById(1L)).thenReturn(enderecoDtoValido);
     when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
 
     Cemiterio resultado = cemiterioService.createCemiterio(cemiterioValido);
@@ -147,7 +159,8 @@ class CemiterioServiceTest {
         .endereco(endereco)
         .build();
 
-    when(enderecoService.getEnderecoById(5L)).thenReturn(endereco);
+    EnderecoResponseDTO enderecoDto = new EnderecoResponseDTO(5L, null, null, null, null);
+    when(enderecoService.getEnderecoById(5L)).thenReturn(enderecoDto);
     when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterio);
 
     cemiterioService.createCemiterio(cemiterio);
@@ -204,7 +217,9 @@ class CemiterioServiceTest {
         .build();
 
     when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
-    when(enderecoService.getEnderecoById(2L)).thenReturn(novoEndereco);
+
+    EnderecoResponseDTO novoEnderecoDto = new EnderecoResponseDTO(2L, null, null, null, null);
+    when(enderecoService.getEnderecoById(2L)).thenReturn(novoEnderecoDto);
     when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
 
     Cemiterio resultado = cemiterioService.updateCemiterio(1L, cemiterioAtualizado);
@@ -245,7 +260,9 @@ class CemiterioServiceTest {
         .build();
 
     when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
-    when(enderecoService.getEnderecoById(3L)).thenReturn(novoEndereco);
+
+    EnderecoResponseDTO novoEnderecoDto = new EnderecoResponseDTO(3L, null, null, null, null);
+    when(enderecoService.getEnderecoById(3L)).thenReturn(novoEnderecoDto);
     when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
 
     cemiterioService.updateCemiterio(1L, cemiterioAtualizado);
@@ -255,11 +272,11 @@ class CemiterioServiceTest {
   }
 
   @Test
-  @DisplayName("Deve lançar exceção ao atualizar cemitério inexistente")
+  @DisplayName("Deve lançar exceção 404 ao atualizar cemitério inexistente")
   void testUpdateCemiterioLancaExcecaoQuandoNaoEncontrado() {
     when(cemiterioRepository.findById(999L)).thenReturn(Optional.empty());
 
-    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+    NotFoundException exception = assertThrows(NotFoundException.class, () -> {
       cemiterioService.updateCemiterio(999L, cemiterioValido);
     });
 
@@ -278,7 +295,9 @@ class CemiterioServiceTest {
         .build();
 
     when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
-    when(enderecoService.getEnderecoById(10L)).thenReturn(endereco);
+
+    EnderecoResponseDTO enderecoDto = new EnderecoResponseDTO(10L, null, null, null, null);
+    when(enderecoService.getEnderecoById(10L)).thenReturn(enderecoDto);
     when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
 
     cemiterioService.updateCemiterio(1L, cemiterioAtualizado);
@@ -298,11 +317,11 @@ class CemiterioServiceTest {
   }
 
   @Test
-  @DisplayName("Deve lançar exceção ao deletar cemitério inexistente")
+  @DisplayName("Deve lançar exceção 404 ao deletar cemitério inexistente")
   void testDeleteCemiterioLancaExcecaoQuandoNaoEncontrado() {
     when(cemiterioRepository.findById(999L)).thenReturn(Optional.empty());
 
-    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+    NotFoundException exception = assertThrows(NotFoundException.class, () -> {
       cemiterioService.deleteCemiterio(999L);
     });
 
