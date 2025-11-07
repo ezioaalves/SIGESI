@@ -1,11 +1,16 @@
 package com.sigesi.sigesi.cemiterios;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioCreateDTO;
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioResponseDTO;
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioUpdateDTO;
 import com.sigesi.sigesi.config.NotFoundException;
+import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
 
 @Service
@@ -17,41 +22,56 @@ public class CemiterioService {
   @Autowired
   private EnderecoService enderecoService;
 
-  public List<Cemiterio> getAll() {
-    return cemiterioRepository.findAll();
+  @Autowired
+  private CemiterioMapper cemiterioMapper;
+
+  public List<CemiterioResponseDTO> getAll() {
+    return cemiterioRepository.findAllByOrderByIdAsc()
+        .stream()
+        .map(cemiterioMapper::toDto)
+        .collect(Collectors.toList());
   }
 
-  public Cemiterio getCemiterioById(Long id) {
-  return cemiterioRepository.findById(id)
-    .orElseThrow(() -> new NotFoundException("Cemitério não encontrado com id " + id));
+  public CemiterioResponseDTO getCemiterioById(Long id) {
+    Cemiterio cemiterio = this.getCemiterioEntityById(id);
+
+    return cemiterioMapper.toDto(cemiterio);
   }
 
-  public Cemiterio createCemiterio(Cemiterio cemiterio) {
-    if (cemiterio.getEndereco() != null && cemiterio.getEndereco().getId() != null) {
-      enderecoService.getEnderecoById(cemiterio.getEndereco().getId());
+  public CemiterioResponseDTO createCemiterio(CemiterioCreateDTO cemiterioDto) {
+    Endereco endereco = enderecoService.getEnderecoEntityById(cemiterioDto.getEndereco());
+
+    Cemiterio cemiterio = cemiterioMapper.toEntity(cemiterioDto);
+    cemiterio.setEndereco(endereco);
+    cemiterioRepository.save(cemiterio);
+
+    return cemiterioMapper.toDto(cemiterio);
+
+  }
+
+  public CemiterioResponseDTO updateCemiterio(Long id, CemiterioUpdateDTO cemiterioDto) {
+    Cemiterio cemiterio = this.getCemiterioEntityById(id);
+
+    cemiterioMapper.updateFromDto(cemiterioDto, cemiterio);
+
+    if (cemiterioDto.getEndereco() != null) {
+      Endereco endereco = enderecoService.getEnderecoEntityById(cemiterioDto.getEndereco());
+      cemiterio.setEndereco(endereco);
     }
-    return cemiterioRepository.save(cemiterio);
-  }
 
-  public Cemiterio updateCemiterio(Long id, Cemiterio cemiterioAtualizado) {
-  Cemiterio cemiterio = cemiterioRepository.findById(id)
-    .orElseThrow(() -> new NotFoundException("Cemitério não encontrado com id " + id));
+    cemiterioRepository.save(cemiterio);
 
-    cemiterio.setNome(cemiterioAtualizado.getNome());
-
-    if (cemiterioAtualizado.getEndereco() != null
-        && cemiterioAtualizado.getEndereco().getId() != null) {
-      enderecoService.getEnderecoById(cemiterioAtualizado.getEndereco().getId());
-      cemiterio.setEndereco(cemiterioAtualizado.getEndereco());
-    }
-
-    return cemiterioRepository.save(cemiterio);
+    return cemiterioMapper.toDto(cemiterio);
   }
 
   public void deleteCemiterio(Long id) {
-  Cemiterio cemiterio = cemiterioRepository.findById(id)
-    .orElseThrow(() -> new NotFoundException("Cemitério não encontrado com id " + id));
+    Cemiterio cemiterio = this.getCemiterioEntityById(id);
 
     cemiterioRepository.delete(cemiterio);
+  }
+
+  public Cemiterio getCemiterioEntityById(Long id) {
+    return cemiterioRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Cemiterio não econtrado com id " + id));
   }
 }
