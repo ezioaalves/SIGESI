@@ -1,11 +1,19 @@
 package com.sigesi.sigesi.pessoas;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sigesi.sigesi.enderecos.EnderecoService;
+import com.sigesi.sigesi.config.ConflictException;
+import com.sigesi.sigesi.config.NotFoundException;
+import com.sigesi.sigesi.enderecos.Endereco;
+import com.sigesi.sigesi.enderecos.EnderecoRepository;
+import com.sigesi.sigesi.pessoas.dtos.PessoaCreateDTO;
+import com.sigesi.sigesi.pessoas.dtos.PessoaResponseDTO;
+import com.sigesi.sigesi.pessoas.dtos.PessoaUpdateDTO;
 
 @Service
 public class PessoaService {
@@ -14,44 +22,63 @@ public class PessoaService {
   private PessoaRepository pessoaRepository;
 
   @Autowired
-  private EnderecoService enderecoService;
+  private EnderecoRepository enderecoRepository;
 
-  public List<Pessoa> getAll() {
-    return pessoaRepository.findAll();
+  @Autowired
+  private PessoaMapper pessoaMapper;
+
+  public List<PessoaResponseDTO> getAll() {
+    return pessoaRepository.findAllByOrderByIdAsc()
+        .stream()
+        .map(pessoaMapper::toDto)
+        .collect(Collectors.toList());
   }
 
-  public Pessoa getPessoaById(Long id) {
-    return pessoaRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Pessoa não encontrada com id " + id));
-  }
-
-  public Pessoa getPessoaByCpf(String cpf) {
-    return pessoaRepository.findByCpf(cpf)
-        .orElseThrow(() -> new RuntimeException("Pessoa não encontrada com CPF " + cpf));
-  }
-
-  public Pessoa createPessoa(Pessoa pessoa) {
-    if (pessoa.getEndereco() != null && pessoa.getEndereco().getId() != null) {
-      enderecoService.getEnderecoById(pessoa.getEndereco().getId());
-    }
-    return pessoaRepository.save(pessoa);
-  }
-
-  public Pessoa updatePessoa(Long id, Pessoa pessoaAtualizada) {
+  public PessoaResponseDTO getPessoaById(Long id) {
     Pessoa pessoa = pessoaRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Pessoa não encontrada com id " + id));
+        .orElseThrow(() -> new NotFoundException("Pessoa não encontrada com ID " + id));
 
-    pessoa.setNome(pessoaAtualizada.getNome());
-    pessoa.setCpf(pessoaAtualizada.getCpf());
-    pessoa.setSexo(pessoaAtualizada.getSexo());
+    return pessoaMapper.toDto(pessoa);
+  }
 
-    if (pessoaAtualizada.getEndereco() != null
-        && pessoaAtualizada.getEndereco().getId() != null) {
-      enderecoService.getEnderecoById(pessoaAtualizada.getEndereco().getId());
-      pessoa.setEndereco(pessoaAtualizada.getEndereco());
+  public PessoaResponseDTO getPessoaByCpf(String cpf) {
+    Pessoa pessoa = pessoaRepository.findByCpf(cpf)
+        .orElseThrow(() -> new NotFoundException("Pessoa não encontrada com CPF " + cpf));
+
+    return pessoaMapper.toDto(pessoa);
+  }
+
+  public PessoaResponseDTO createPessoa(PessoaCreateDTO pessoaDTO) {
+    Endereco endereco = enderecoRepository.findById(pessoaDTO.getEnderecoId())
+        .orElseThrow(() -> new NotFoundException("Endereço não encontrado"));
+
+    Optional<Pessoa> pessoa = pessoaRepository.findByCpf(pessoaDTO.getCpf());
+
+    if (pessoa.isPresent()) {
+      throw new ConflictException("CPF já cadastrado");
     }
 
-    return pessoaRepository.save(pessoa);
+    Pessoa entity = pessoaMapper.toEntity(pessoaDTO);
+    entity.setEndereco(endereco);
+    pessoaRepository.save(entity);
+
+    return pessoaMapper.toDto(entity);
+  }
+
+  public PessoaResponseDTO updatePessoa(Long id, PessoaUpdateDTO pessoaDTO) {
+    Pessoa entity = pessoaRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
+
+    pessoaMapper.updateFromDto(pessoaDTO, entity);
+
+    if (pessoaDTO.getEnderecoId() != null) {
+      Endereco endereco = enderecoRepository.findById(pessoaDTO.getEnderecoId())
+          .orElseThrow(() -> new NotFoundException("Endereço não encontrado"));
+      entity.setEndereco(endereco);
+    }
+
+    pessoaRepository.save(entity);
+    return pessoaMapper.toDto(entity);
   }
 
   public void deletePessoa(Long id) {
