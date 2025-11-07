@@ -1,7 +1,6 @@
 package com.sigesi.sigesi.pessoas;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sigesi.sigesi.config.ConflictException;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
-import com.sigesi.sigesi.enderecos.EnderecoRepository;
+import com.sigesi.sigesi.enderecos.EnderecoService;
 import com.sigesi.sigesi.pessoas.dtos.PessoaCreateDTO;
 import com.sigesi.sigesi.pessoas.dtos.PessoaResponseDTO;
 import com.sigesi.sigesi.pessoas.dtos.PessoaUpdateDTO;
@@ -22,7 +21,7 @@ public class PessoaService {
   private PessoaRepository pessoaRepository;
 
   @Autowired
-  private EnderecoRepository enderecoRepository;
+  private EnderecoService enderecoService;
 
   @Autowired
   private PessoaMapper pessoaMapper;
@@ -49,42 +48,46 @@ public class PessoaService {
   }
 
   public PessoaResponseDTO createPessoa(PessoaCreateDTO pessoaDTO) {
-    Endereco endereco = enderecoRepository.findById(pessoaDTO.getEnderecoId())
-        .orElseThrow(() -> new NotFoundException("Endereço não encontrado"));
+    this.checkPessoaConflict(pessoaDTO.getCpf());
 
-    Optional<Pessoa> pessoa = pessoaRepository.findByCpf(pessoaDTO.getCpf());
+    Endereco endereco = enderecoService.getEnderecoEntityById(pessoaDTO.getEnderecoId());
 
-    if (pessoa.isPresent()) {
-      throw new ConflictException("CPF já cadastrado");
-    }
+    Pessoa pessoa = pessoaMapper.toEntity(pessoaDTO);
+    pessoa.setEndereco(endereco);
 
-    Pessoa entity = pessoaMapper.toEntity(pessoaDTO);
-    entity.setEndereco(endereco);
-    pessoaRepository.save(entity);
+    pessoa = pessoaRepository.save(pessoa);
 
-    return pessoaMapper.toDto(entity);
+    return pessoaMapper.toDto(pessoa);
   }
 
   public PessoaResponseDTO updatePessoa(Long id, PessoaUpdateDTO pessoaDTO) {
-    Pessoa entity = pessoaRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
+    Pessoa pessoa = this.getPessoEntityById(id);
 
-    pessoaMapper.updateFromDto(pessoaDTO, entity);
+    pessoaMapper.updateFromDto(pessoaDTO, pessoa);
 
     if (pessoaDTO.getEnderecoId() != null) {
-      Endereco endereco = enderecoRepository.findById(pessoaDTO.getEnderecoId())
-          .orElseThrow(() -> new NotFoundException("Endereço não encontrado"));
-      entity.setEndereco(endereco);
+      Endereco endereco = enderecoService.getEnderecoEntityById(id);
+      pessoa.setEndereco(endereco);
     }
 
-    pessoaRepository.save(entity);
-    return pessoaMapper.toDto(entity);
+    pessoaRepository.save(pessoa);
+    return pessoaMapper.toDto(pessoa);
   }
 
   public void deletePessoa(Long id) {
-    Pessoa pessoa = pessoaRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Pessoa não encontrada com id " + id));
+    Pessoa pessoa = this.getPessoEntityById(id);
 
     pessoaRepository.delete(pessoa);
   }
+
+  public Pessoa getPessoEntityById(Long id) {
+    return pessoaRepository.findById(id).orElseThrow(() -> new NotFoundException("pessoa não encontrada com id " + id));
+  }
+
+  public void checkPessoaConflict(String cpf) {
+    if (pessoaRepository.existsByCpf(cpf)) {
+      throw new ConflictException("CPF já cadastrado");
+    }
+  }
+
 }

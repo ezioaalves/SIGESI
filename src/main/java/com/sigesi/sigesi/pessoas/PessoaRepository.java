@@ -10,5 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface PessoaRepository extends JpaRepository<Pessoa, Long> {
   Optional<Pessoa> findByCpf(String cpf);
 
+  boolean existsByCpf(String cpf);
+
   List<Pessoa> findAllByOrderByIdAsc();
 }
