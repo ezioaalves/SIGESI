@@ -28,8 +28,7 @@ public class EnderecoService {
   }
 
   public EnderecoResponseDTO getEnderecoById(Long id) {
-    Endereco endereco = enderecoRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Endereço não encontrado com id " + id));
+    Endereco endereco = this.getEnderecoEntityById(id);
 
     return enderecoMapper.toDto(endereco);
   }
@@ -41,8 +40,7 @@ public class EnderecoService {
   }
 
   public EnderecoResponseDTO updateEndereco(Long id, EnderecoUpdateDTO enderecoDTO) {
-    Endereco endereco = enderecoRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Endereço não encontrado com id " + id));
+    Endereco endereco = this.getEnderecoEntityById(id);
 
     enderecoMapper.updateFromDto(enderecoDTO, endereco);
     Endereco enderecoAtualizado = enderecoRepository.save(endereco);
@@ -50,9 +48,13 @@ public class EnderecoService {
   }
 
   public void deleteEndereco(Long id) {
-    Endereco endereco = enderecoRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Endereço não encontrado com id " + id));
+    Endereco endereco = this.getEnderecoEntityById(id);
 
     enderecoRepository.delete(endereco);
+  }
+
+  public Endereco getEnderecoEntityById(Long id) {
+    return enderecoRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Endereço não encontrado com id " + id));
   }
 }
