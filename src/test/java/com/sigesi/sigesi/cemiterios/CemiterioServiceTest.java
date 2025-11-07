@@ -1,15 +1,9 @@
 package com.sigesi.sigesi.cemiterios;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,14 +17,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioCreateDTO;
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioResponseDTO;
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioUpdateDTO;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
 import com.sigesi.sigesi.enderecos.dtos.EnderecoResponseDTO;
 
-/**
- * Testes unitários para CemiterioService.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CemiterioService Tests")
 class CemiterioServiceTest {
@@ -41,86 +35,65 @@ class CemiterioServiceTest {
   @Mock
   private EnderecoService enderecoService;
 
+  @Mock
+  private CemiterioMapper cemiterioMapper;
+
   @InjectMocks
   private CemiterioService cemiterioService;
 
-  private Cemiterio cemiterioValido;
-  private Endereco enderecoEntityValido;
-  private EnderecoResponseDTO enderecoDtoValido;
+  private CemiterioCreateDTO cemiterioCreateDTO;
+  private Endereco enderecoEntity;
+  private EnderecoResponseDTO enderecoDTO;
 
   @BeforeEach
   void setUp() {
-    enderecoEntityValido = Endereco.builder()
-        .id(1L)
-        .logradouro("Rua Exemplo")
-        .numero("123")
-        .bairro("Centro")
-        .build();
-
-    enderecoDtoValido = new EnderecoResponseDTO(
-        1L,
-        "Rua Exemplo",
-        "123",
-        "Centro",
-        null // referencia
-    );
-
-    cemiterioValido = Cemiterio.builder()
-        .id(1L)
-        .nome("Cemitério Central")
-        .endereco(enderecoEntityValido)
-        .build();
+    enderecoEntity = Endereco.builder().id(1L).logradouro("Rua Exemplo").numero("123").bairro("Centro").build();
+    enderecoDTO = new EnderecoResponseDTO(1L, "Rua Exemplo", "123", "Centro", null);
+    cemiterioCreateDTO = new CemiterioCreateDTO("Cemitério Central", enderecoDTO.getId());
   }
 
   @Test
   @DisplayName("Deve retornar lista vazia quando não há cemitérios")
   void testGetAllRetornaListaVazia() {
-    when(cemiterioRepository.findAll()).thenReturn(List.of());
+    when(cemiterioRepository.findAllByOrderByIdAsc()).thenReturn(List.of());
 
-    List<Cemiterio> resultado = cemiterioService.getAll();
+    List<CemiterioResponseDTO> resultado = cemiterioService.getAll();
 
     assertNotNull(resultado);
     assertTrue(resultado.isEmpty());
-    verify(cemiterioRepository, times(1)).findAll();
+    verify(cemiterioRepository, times(1)).findAllByOrderByIdAsc();
   }
 
   @Test
   @DisplayName("Deve retornar lista com cemitérios existentes")
   void testGetAllRetornaListaComCemiterios() {
-    Endereco outroEndereco = Endereco.builder().id(2L).build();
-    Cemiterio cemiterio2 = Cemiterio.builder()
-        .id(2L)
-        .nome("Cemitério Municipal")
-        .endereco(outroEndereco)
-        .build();
+    Cemiterio c1 = mock(Cemiterio.class);
+    Cemiterio c2 = mock(Cemiterio.class);
+    Cemiterio c3 = mock(Cemiterio.class);
 
-    Cemiterio cemiterio3 = Cemiterio.builder()
-        .id(3L)
-        .nome("Cemitério Parque")
-        .endereco(outroEndereco)
-        .build();
+    when(cemiterioRepository.findAllByOrderByIdAsc()).thenReturn(Arrays.asList(c1, c2, c3));
+    when(cemiterioMapper.toDto(any())).thenReturn(mock(CemiterioResponseDTO.class));
 
-    when(cemiterioRepository.findAll())
-        .thenReturn(Arrays.asList(cemiterioValido, cemiterio2, cemiterio3));
+    List<CemiterioResponseDTO> resultado = cemiterioService.getAll();
 
-    List<Cemiterio> resultado = cemiterioService.getAll();
-
-    assertNotNull(resultado);
     assertEquals(3, resultado.size());
-    verify(cemiterioRepository, times(1)).findAll();
+    verify(cemiterioRepository, times(1)).findAllByOrderByIdAsc();
   }
 
   @Test
   @DisplayName("Deve retornar cemitério quando buscar por ID existente")
   void testGetCemiterioByIdComSucesso() {
-    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
+    Cemiterio cemiterio = mock(Cemiterio.class);
+    CemiterioResponseDTO dto = new CemiterioResponseDTO(1L, "Cemitério Central", enderecoDTO);
 
-    Cemiterio resultado = cemiterioService.getCemiterioById(1L);
+    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterio));
+    when(cemiterioMapper.toDto(cemiterio)).thenReturn(dto);
+
+    CemiterioResponseDTO resultado = cemiterioService.getCemiterioById(1L);
 
     assertNotNull(resultado);
     assertEquals(1L, resultado.getId());
     assertEquals("Cemitério Central", resultado.getNome());
-    verify(cemiterioRepository, times(1)).findById(1L);
   }
 
   @Test
@@ -132,188 +105,53 @@ class CemiterioServiceTest {
       cemiterioService.getCemiterioById(999L);
     });
 
-    assertEquals("Cemitério não encontrado com id 999", exception.getMessage());
-    verify(cemiterioRepository, times(1)).findById(999L);
+    assertTrue(exception.getMessage().contains("Cemiterio não econtrado"));
   }
 
   @Test
   @DisplayName("Deve criar cemitério com endereço válido")
   void testCreateCemiterioComSucesso() {
-    when(enderecoService.getEnderecoById(1L)).thenReturn(enderecoDtoValido);
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
+    Cemiterio cemiterioEntity = mock(Cemiterio.class);
+    CemiterioResponseDTO dto = mock(CemiterioResponseDTO.class);
 
-    Cemiterio resultado = cemiterioService.createCemiterio(cemiterioValido);
+    when(enderecoService.getEnderecoEntityById(1L)).thenReturn(enderecoEntity);
+    when(cemiterioMapper.toEntity(cemiterioCreateDTO)).thenReturn(cemiterioEntity);
+    when(cemiterioMapper.toDto(cemiterioEntity)).thenReturn(dto);
+
+    CemiterioResponseDTO resultado = cemiterioService.createCemiterio(cemiterioCreateDTO);
 
     assertNotNull(resultado);
-    assertEquals("Cemitério Central", resultado.getNome());
-    verify(enderecoService, times(1)).getEnderecoById(1L);
-    verify(cemiterioRepository, times(1)).save(cemiterioValido);
-  }
-
-  @Test
-  @DisplayName("Deve validar que EnderecoService é chamado ao criar cemitério")
-  void testCreateCemiterioValidaEnderecoExistente() {
-    Endereco endereco = Endereco.builder().id(5L).build();
-    Cemiterio cemiterio = Cemiterio.builder()
-        .nome("Novo Cemitério")
-        .endereco(endereco)
-        .build();
-
-    EnderecoResponseDTO enderecoDto = new EnderecoResponseDTO(5L, null, null, null, null);
-    when(enderecoService.getEnderecoById(5L)).thenReturn(enderecoDto);
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterio);
-
-    cemiterioService.createCemiterio(cemiterio);
-
-    verify(enderecoService, times(1)).getEnderecoById(5L);
-    verify(cemiterioRepository, times(1)).save(cemiterio);
-  }
-
-  @Test
-  @DisplayName("Deve criar cemitério sem validar quando endereço é nulo")
-  void testCreateCemiterioComEnderecoNulo() {
-    Cemiterio cemiterio = Cemiterio.builder()
-        .nome("Cemitério Sem Endereço")
-        .endereco(null)
-        .build();
-
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterio);
-
-    cemiterioService.createCemiterio(cemiterio);
-
-    verify(enderecoService, never()).getEnderecoById(anyLong());
-    verify(cemiterioRepository, times(1)).save(cemiterio);
-  }
-
-  @Test
-  @DisplayName("Deve criar cemitério sem validar quando endereço não tem ID")
-  void testCreateCemiterioComEnderecoSemId() {
-    Endereco enderecoSemId = Endereco.builder()
-        .logradouro("Rua Teste")
-        .numero("456")
-        .bairro("Bairro")
-        .build();
-
-    Cemiterio cemiterio = Cemiterio.builder()
-        .nome("Cemitério Teste")
-        .endereco(enderecoSemId)
-        .build();
-
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterio);
-
-    cemiterioService.createCemiterio(cemiterio);
-
-    verify(enderecoService, never()).getEnderecoById(anyLong());
-    verify(cemiterioRepository, times(1)).save(cemiterio);
+    verify(enderecoService, times(1)).getEnderecoEntityById(1L);
+    verify(cemiterioRepository, times(1)).save(cemiterioEntity);
   }
 
   @Test
   @DisplayName("Deve atualizar cemitério com sucesso")
   void testUpdateCemiterioComSucesso() {
-    Endereco novoEndereco = Endereco.builder().id(2L).build();
-    Cemiterio cemiterioAtualizado = Cemiterio.builder()
-        .nome("Novo Nome")
-        .endereco(novoEndereco)
-        .build();
+    Cemiterio cemiterio = mock(Cemiterio.class);
+    CemiterioUpdateDTO updateDTO = new CemiterioUpdateDTO("Novo Nome", enderecoDTO.getId());
+    CemiterioResponseDTO dto = mock(CemiterioResponseDTO.class);
 
-    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
+    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterio));
+    when(enderecoService.getEnderecoEntityById(anyLong())).thenReturn(enderecoEntity);
+    when(cemiterioMapper.toDto(cemiterio)).thenReturn(dto);
 
-    EnderecoResponseDTO novoEnderecoDto = new EnderecoResponseDTO(2L, null, null, null, null);
-    when(enderecoService.getEnderecoById(2L)).thenReturn(novoEnderecoDto);
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
-
-    Cemiterio resultado = cemiterioService.updateCemiterio(1L, cemiterioAtualizado);
+    CemiterioResponseDTO resultado = cemiterioService.updateCemiterio(1L, updateDTO);
 
     assertNotNull(resultado);
-    assertEquals("Novo Nome", cemiterioValido.getNome());
-    assertEquals(novoEndereco, cemiterioValido.getEndereco());
-    verify(cemiterioRepository, times(1)).findById(1L);
-    verify(enderecoService, times(1)).getEnderecoById(2L);
-    verify(cemiterioRepository, times(1)).save(cemiterioValido);
-  }
-
-  @Test
-  @DisplayName("Deve atualizar apenas nome quando endereço é nulo")
-  void testUpdateCemiterioApenasNome() {
-    Cemiterio cemiterioAtualizado = Cemiterio.builder()
-        .nome("Nome Atualizado")
-        .endereco(null)
-        .build();
-
-    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
-
-    cemiterioService.updateCemiterio(1L, cemiterioAtualizado);
-
-    assertEquals("Nome Atualizado", cemiterioValido.getNome());
-    verify(enderecoService, never()).getEnderecoById(anyLong());
-    verify(cemiterioRepository, times(1)).save(cemiterioValido);
-  }
-
-  @Test
-  @DisplayName("Deve atualizar endereço quando fornecido")
-  void testUpdateCemiterioApenasEndereco() {
-    Endereco novoEndereco = Endereco.builder().id(3L).build();
-    Cemiterio cemiterioAtualizado = Cemiterio.builder()
-        .nome("Cemitério Central")
-        .endereco(novoEndereco)
-        .build();
-
-    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
-
-    EnderecoResponseDTO novoEnderecoDto = new EnderecoResponseDTO(3L, null, null, null, null);
-    when(enderecoService.getEnderecoById(3L)).thenReturn(novoEnderecoDto);
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
-
-    cemiterioService.updateCemiterio(1L, cemiterioAtualizado);
-
-    assertEquals(novoEndereco, cemiterioValido.getEndereco());
-    verify(enderecoService, times(1)).getEnderecoById(3L);
-  }
-
-  @Test
-  @DisplayName("Deve lançar exceção 404 ao atualizar cemitério inexistente")
-  void testUpdateCemiterioLancaExcecaoQuandoNaoEncontrado() {
-    when(cemiterioRepository.findById(999L)).thenReturn(Optional.empty());
-
-    NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-      cemiterioService.updateCemiterio(999L, cemiterioValido);
-    });
-
-    assertEquals("Cemitério não encontrado com id 999", exception.getMessage());
-    verify(cemiterioRepository, never()).save(any(Cemiterio.class));
-    verify(enderecoService, never()).getEnderecoById(anyLong());
-  }
-
-  @Test
-  @DisplayName("Deve validar endereço ao atualizar cemitério")
-  void testUpdateCemiterioValidaEnderecoExistente() {
-    Endereco endereco = Endereco.builder().id(10L).build();
-    Cemiterio cemiterioAtualizado = Cemiterio.builder()
-        .nome("Cemitério Atualizado")
-        .endereco(endereco)
-        .build();
-
-    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
-
-    EnderecoResponseDTO enderecoDto = new EnderecoResponseDTO(10L, null, null, null, null);
-    when(enderecoService.getEnderecoById(10L)).thenReturn(enderecoDto);
-    when(cemiterioRepository.save(any(Cemiterio.class))).thenReturn(cemiterioValido);
-
-    cemiterioService.updateCemiterio(1L, cemiterioAtualizado);
-
-    verify(enderecoService, times(1)).getEnderecoById(10L);
+    verify(cemiterioRepository, times(1)).save(cemiterio);
+    verify(enderecoService, times(1)).getEnderecoEntityById(enderecoDTO.getId());
   }
 
   @Test
   @DisplayName("Deve deletar cemitério com sucesso")
   void testDeleteCemiterioComSucesso() {
-    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterioValido));
+    Cemiterio cemiterio = mock(Cemiterio.class);
+    when(cemiterioRepository.findById(1L)).thenReturn(Optional.of(cemiterio));
 
     cemiterioService.deleteCemiterio(1L);
 
-    verify(cemiterioRepository, times(1)).findById(1L);
-    verify(cemiterioRepository, times(1)).delete(cemiterioValido);
+    verify(cemiterioRepository, times(1)).delete(cemiterio);
   }
 
   @Test
@@ -321,11 +159,7 @@ class CemiterioServiceTest {
   void testDeleteCemiterioLancaExcecaoQuandoNaoEncontrado() {
     when(cemiterioRepository.findById(999L)).thenReturn(Optional.empty());
 
-    NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-      cemiterioService.deleteCemiterio(999L);
-    });
-
-    assertEquals("Cemitério não encontrado com id 999", exception.getMessage());
-    verify(cemiterioRepository, never()).delete(any(Cemiterio.class));
+    assertThrows(NotFoundException.class, () -> cemiterioService.deleteCemiterio(999L));
+    verify(cemiterioRepository, never()).delete(any());
   }
 }

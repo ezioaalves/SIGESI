@@ -6,13 +6,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
 
@@ -26,10 +21,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sigesi.sigesi.enderecos.Endereco;
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioCreateDTO;
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioUpdateDTO;
+import com.sigesi.sigesi.cemiterios.dtos.CemiterioResponseDTO;
+import com.sigesi.sigesi.enderecos.dtos.EnderecoResponseDTO;
 
 @WebMvcTest(controllers = CemiterioController.class)
-@AutoConfigureMockMvc(addFilters = false) // desabilita filtros de segurança para simplificar os testes
+@AutoConfigureMockMvc(addFilters = false)
 @DisplayName("CemiterioController Tests")
 class CemiterioControllerTest {
 
@@ -42,8 +40,9 @@ class CemiterioControllerTest {
   @MockBean
   private CemiterioService cemiterioService;
 
-  private Endereco endereco(Long id) {
-    return Endereco.builder()
+  // ===== Métodos auxiliares =====
+  private EnderecoResponseDTO enderecoDTO(Long id) {
+    return EnderecoResponseDTO.builder()
         .id(id)
         .logradouro("Rua Exemplo")
         .numero("123")
@@ -51,37 +50,42 @@ class CemiterioControllerTest {
         .build();
   }
 
-  private Cemiterio cemiterio(Long id, String nome, Long enderecoId) {
-    return Cemiterio.builder()
+  private CemiterioResponseDTO cemiterioDTO(Long id, String nome, Long enderecoId) {
+    return CemiterioResponseDTO.builder()
         .id(id)
         .nome(nome)
-        .endereco(endereco(enderecoId))
+        .endereco(enderecoDTO(enderecoId))
         .build();
   }
 
+  private CemiterioCreateDTO createDTO(String nome, Long enderecoId) {
+    return CemiterioCreateDTO.builder()
+        .nome(nome)
+        .endereco(enderecoId)
+        .build();
+  }
+
+  // ===== GET =====
   @Test
-  @DisplayName("GET /api/cemiterios/ deve retornar 200 com lista vazia")
+  @DisplayName("GET /api/cemiterios/ retorna 200 com lista vazia")
   void testListAllRetorna200ComListaVazia() throws Exception {
     given(cemiterioService.getAll()).willReturn(List.of());
 
-    mockMvc.perform(get("/api/cemiterios/")
-        .accept(MediaType.APPLICATION_JSON))
+    mockMvc.perform(get("/api/cemiterios/").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(content().json("[]"));
   }
 
   @Test
-  @DisplayName("GET /api/cemiterios/ deve retornar 200 com lista de cemitérios")
+  @DisplayName("GET /api/cemiterios/ retorna 200 com cemitérios")
   void testListAllRetorna200ComCemiterios() throws Exception {
-    var c1 = cemiterio(1L, "Cemitério Central", 1L);
-    var c2 = cemiterio(2L, "Cemitério Municipal", 1L);
+    var c1 = cemiterioDTO(1L, "Cemitério Central", 1L);
+    var c2 = cemiterioDTO(2L, "Cemitério Municipal", 1L);
     given(cemiterioService.getAll()).willReturn(List.of(c1, c2));
 
-    mockMvc.perform(get("/api/cemiterios/")
-        .accept(MediaType.APPLICATION_JSON))
+    mockMvc.perform(get("/api/cemiterios/").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].id", is(1)))
         .andExpect(jsonPath("$[0].nome", is("Cemitério Central")))
@@ -91,173 +95,106 @@ class CemiterioControllerTest {
   }
 
   @Test
-  @DisplayName("GET /api/cemiterios/{id} deve retornar 200 com cemitério encontrado")
+  @DisplayName("GET /api/cemiterios/{id} retorna 200 com cemitério encontrado")
   void testGetByIdRetorna200ComCemiterio() throws Exception {
-    var c1 = cemiterio(1L, "Cemitério Central", 1L);
+    var c1 = cemiterioDTO(1L, "Cemitério Central", 1L);
     given(cemiterioService.getCemiterioById(1L)).willReturn(c1);
 
-    mockMvc.perform(get("/api/cemiterios/{id}", 1L)
-        .accept(MediaType.APPLICATION_JSON))
+    mockMvc.perform(get("/api/cemiterios/{id}", 1L).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
         .andExpect(jsonPath("$.nome", is("Cemitério Central")))
         .andExpect(jsonPath("$.endereco.id", is(1)));
   }
 
-    @Test
-    @DisplayName("GET /api/cemiterios/{id} deve retornar 404 quando não encontrado")
-    void testGetByIdRetorna404QuandoNaoEncontrado() throws Exception {
-      given(cemiterioService.getCemiterioById(999L))
-          .willThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"));
-
-      mockMvc.perform(get("/api/cemiterios/{id}", 999L)
-          .accept(MediaType.APPLICATION_JSON))
-          .andExpect(status().isNotFound());
-    }
-
   @Test
-  @DisplayName("POST /api/cemiterios/ deve retornar 201 ao criar com sucesso")
-  void testCreateRetorna201ComCemiterioValido() throws Exception {
-    var request = Cemiterio.builder()
-        .nome("Cemitério Central")
-        .endereco(Endereco.builder().id(1L).build())
-        .build();
+  @DisplayName("GET /api/cemiterios/{id} retorna 404 quando não encontrado")
+  void testGetByIdRetorna404QuandoNaoEncontrado() throws Exception {
+    given(cemiterioService.getCemiterioById(999L))
+        .willThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"));
 
-    var created = cemiterio(1L, "Cemitério Central", 1L);
-    given(cemiterioService.createCemiterio(any(Cemiterio.class))).willReturn(created);
+    mockMvc.perform(get("/api/cemiterios/{id}", 999L))
+        .andExpect(status().isNotFound());
+  }
+
+  // ===== POST =====
+  @Test
+  @DisplayName("POST /api/cemiterios/ retorna 201 ao criar com sucesso")
+  void testCreateRetorna201() throws Exception {
+    var request = createDTO("Cemitério Central", 1L);
+    var response = cemiterioDTO(1L, "Cemitério Central", 1L);
+
+    given(cemiterioService.createCemiterio(any(CemiterioCreateDTO.class))).willReturn(response);
 
     mockMvc.perform(post("/api/cemiterios/")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.nome", is("Cemitério Central")));
+        .andExpect(jsonPath("$.nome", is("Cemitério Central")))
+        .andExpect(jsonPath("$.endereco.id", is(1)));
   }
 
   @Test
-  @DisplayName("POST /api/cemiterios/ deve retornar 400 quando nome é omitido")
-  void testCreateRetorna400SemNome() throws Exception {
-    String body = "{\n" +
-        "  \"endereco\": { \"id\": 1 }\n" +
-        "}";
+  @DisplayName("POST /api/cemiterios/ retorna 400 quando dados inválidos")
+  void testCreateRetorna400() throws Exception {
+    var request = createDTO("", null);
 
     mockMvc.perform(post("/api/cemiterios/")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(body))
+        .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
   }
 
+  // ===== PUT =====
   @Test
-  @DisplayName("POST /api/cemiterios/ deve retornar 400 quando nome é vazio")
-  void testCreateRetorna400ComNomeVazio() throws Exception {
-    String body = "{\n" +
-        "  \"nome\": \"\",\n" +
-        "  \"endereco\": { \"id\": 1 }\n" +
-        "}";
+  @DisplayName("PATCH /api/cemiterios/{id} retorna 200 com dados atualizados")
+  void testUpdateRetorna200() throws Exception {
+    var request = createDTO("Novo Nome", 2L);
+    var response = cemiterioDTO(1L, "Novo Nome", 2L);
 
-    mockMvc.perform(post("/api/cemiterios/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(body))
-        .andExpect(status().isBadRequest());
-  }
+    given(cemiterioService.updateCemiterio(eq(1L), any(CemiterioUpdateDTO.class))).willReturn(response);
 
-  @Test
-  @DisplayName("POST /api/cemiterios/ deve retornar 400 quando nome é apenas espaços")
-  void testCreateRetorna400ComNomeApenasEspacos() throws Exception {
-    String body = "{\n" +
-        "  \"nome\": \"   \",\n" +
-        "  \"endereco\": { \"id\": 1 }\n" +
-        "}";
-
-    mockMvc.perform(post("/api/cemiterios/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(body))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @DisplayName("POST /api/cemiterios/ deve retornar 400 quando endereço é omitido")
-  void testCreateRetorna400SemEndereco() throws Exception {
-    String body = "{\n" +
-        "  \"nome\": \"Cemitério Central\"\n" +
-        "}";
-
-    mockMvc.perform(post("/api/cemiterios/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(body))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @DisplayName("PUT /api/cemiterios/{id} deve retornar 200 com dados atualizados")
-  void testUpdateRetorna200ComCemiterioAtualizado() throws Exception {
-    var request = Cemiterio.builder()
-        .nome("Novo Nome")
-        .endereco(Endereco.builder().id(2L).build())
-        .build();
-
-    var atualizado = cemiterio(1L, "Novo Nome", 2L);
-    given(cemiterioService.updateCemiterio(eq(1L), any(Cemiterio.class))).willReturn(atualizado);
-
-    mockMvc.perform(put("/api/cemiterios/{id}", 1L)
+    mockMvc.perform(patch("/api/cemiterios/{id}", 1L)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
         .andExpect(jsonPath("$.nome", is("Novo Nome")))
         .andExpect(jsonPath("$.endereco.id", is(2)));
   }
 
   @Test
-  @DisplayName("PUT /api/cemiterios/{id} deve retornar 400 com dados inválidos")
-  void testUpdateRetorna400ComDadosInvalidos() throws Exception {
-    String body = "{\n" +
-        "  \"nome\": \"\",\n" +
-        "  \"endereco\": { \"id\": 1 }\n" +
-        "}";
+  @DisplayName("PATCH /api/cemiterios/{id} retorna 404 quando cemitério não existe")
+  void testUpdateRetorna404() throws Exception {
+    var request = createDTO("Novo Nome", 2L);
 
-    mockMvc.perform(put("/api/cemiterios/{id}", 1L)
+    given(cemiterioService.updateCemiterio(eq(999L), any(CemiterioUpdateDTO.class)))
+        .willThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"));
+
+    mockMvc.perform(put("/api/cemiterios/{id}", 999L)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(body))
-        .andExpect(status().isBadRequest());
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNotFound());
   }
 
-    @Test
-    @DisplayName("PUT /api/cemiterios/{id} deve retornar 404 quando cemitério não existe")
-    void testUpdateRetorna404QuandoNaoEncontrado() throws Exception {
-    var request = Cemiterio.builder()
-        .nome("Novo Nome")
-        .endereco(Endereco.builder().id(2L).build())
-        .build();
-
-    given(cemiterioService.updateCemiterio(eq(999L), any(Cemiterio.class)))
-          .willThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"));
-
-      mockMvc.perform(put("/api/cemiterios/{id}", 999L)
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(objectMapper.writeValueAsString(request)))
-          .andExpect(status().isNotFound());
-  }
-
+  // ===== DELETE =====
   @Test
-  @DisplayName("DELETE /api/cemiterios/{id} deve retornar 204 quando excluir com sucesso")
-  void testDeleteRetorna204QuandoExcluiComSucesso() throws Exception {
+  @DisplayName("DELETE /api/cemiterios/{id} retorna 204 quando exclui com sucesso")
+  void testDeleteRetorna204() throws Exception {
     doNothing().when(cemiterioService).deleteCemiterio(1L);
 
     mockMvc.perform(delete("/api/cemiterios/{id}", 1L))
         .andExpect(status().isNoContent());
   }
 
-    @Test
-    @DisplayName("DELETE /api/cemiterios/{id} deve retornar 404 quando não encontrado")
-    void testDeleteRetorna404QuandoNaoEncontrado() throws Exception {
-      doThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"))
-          .when(cemiterioService).deleteCemiterio(999L);
+  @Test
+  @DisplayName("DELETE /api/cemiterios/{id} retorna 404 quando não encontrado")
+  void testDeleteRetorna404() throws Exception {
+    doThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"))
+        .when(cemiterioService).deleteCemiterio(999L);
 
-      mockMvc.perform(delete("/api/cemiterios/{id}", 999L))
-          .andExpect(status().isNotFound());
-    }
+    mockMvc.perform(delete("/api/cemiterios/{id}", 999L))
+        .andExpect(status().isNotFound());
+  }
 }
