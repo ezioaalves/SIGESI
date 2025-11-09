@@ -33,6 +33,15 @@ public class GlobalExceptionHandler {
             "message", message));
   }
 
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(Map.of(
+            "status", HttpStatus.CONFLICT.value(),
+            "error", "Conflito",
+            "message", ex.getMessage()));
+  }
+
   @ExceptionHandler(RuntimeException.class)
   public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

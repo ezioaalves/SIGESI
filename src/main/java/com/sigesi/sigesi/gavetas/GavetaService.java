@@ -1,11 +1,18 @@
 package com.sigesi.sigesi.gavetas;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sigesi.sigesi.config.NotFoundException;
+import com.sigesi.sigesi.gavetas.dtos.GavetaCreateDTO;
+import com.sigesi.sigesi.gavetas.dtos.GavetaResponseDTO;
+import com.sigesi.sigesi.gavetas.dtos.GavetaUpdateDTO;
+import com.sigesi.sigesi.jazigos.Jazigo;
 import com.sigesi.sigesi.jazigos.JazigoService;
+import com.sigesi.sigesi.pessoas.Pessoa;
 import com.sigesi.sigesi.pessoas.PessoaService;
 
 @Service
@@ -15,57 +22,65 @@ public class GavetaService {
   private GavetaRepository gavetaRepository;
 
   @Autowired
+  private GavetaMapper gavetaMapper;
+
+  @Autowired
   private JazigoService jazigoService;
 
   @Autowired
   private PessoaService pessoaService;
 
-  public List<Gaveta> getAll() {
-    return gavetaRepository.findAll();
+  public List<GavetaResponseDTO> getAll() {
+    return gavetaRepository.findAllByOrderByIdAsc()
+        .stream()
+        .map(gavetaMapper::toDto)
+        .collect(Collectors.toList());
   }
 
-  public Gaveta getGavetaById(Long id) {
-    return gavetaRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Gaveta não encontrada com id " + id));
+  public GavetaResponseDTO getGavetaById(Long id) {
+    Gaveta gaveta = this.getGavetaEntityById(id);
+
+    return gavetaMapper.toDto(gaveta);
   }
 
-  public Gaveta createGaveta(Gaveta gaveta) {
-    if (gaveta.getJazigo() != null && gaveta.getJazigo().getId() != null) {
-      jazigoService.getJazigoById(gaveta.getJazigo().getId());
-    }
-    if (gaveta.getOcupante() != null && gaveta.getOcupante().getId() != null) {
-      pessoaService.getPessoaById(gaveta.getOcupante().getId());
-    }
-    return gavetaRepository.save(gaveta);
+  public GavetaResponseDTO createGaveta(GavetaCreateDTO gavetaDto) {
+    Pessoa ocupante = pessoaService.getPessoEntityById(gavetaDto.getOcupante());
+    Jazigo jazigo = jazigoService.getJazigoEntityById(gavetaDto.getJazigo());
+
+    Gaveta gaveta = gavetaMapper.toEntity(gavetaDto);
+    gaveta.setOcupante(ocupante);
+    gaveta.setJazigo(jazigo);
+
+    return gavetaMapper.toDto(gavetaRepository.save(gaveta));
   }
 
-  public Gaveta updateGaveta(Long id, Gaveta gavetaAtualizada) {
-    Gaveta gaveta = gavetaRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Gaveta não encontrada com id " + id));
+  public GavetaResponseDTO updateGaveta(Long id, GavetaUpdateDTO gavetaDto) {
 
-    gaveta.setNumero(gavetaAtualizada.getNumero());
+    Gaveta gaveta = this.getGavetaEntityById(id);
 
-    if (gavetaAtualizada.getJazigo() != null
-        && gavetaAtualizada.getJazigo().getId() != null) {
-      jazigoService.getJazigoById(gavetaAtualizada.getJazigo().getId());
-      gaveta.setJazigo(gavetaAtualizada.getJazigo());
+    if (gavetaDto.getJazigo() != null) {
+      Jazigo jazigo = jazigoService.getJazigoEntityById(gavetaDto.getJazigo());
+      gaveta.setJazigo(jazigo);
     }
 
-    if (gavetaAtualizada.getOcupante() != null
-        && gavetaAtualizada.getOcupante().getId() != null) {
-      pessoaService.getPessoaById(gavetaAtualizada.getOcupante().getId());
-      gaveta.setOcupante(gavetaAtualizada.getOcupante());
-    } else {
-      gaveta.setOcupante(null);
+    if (gavetaDto.getOcupante() != null) {
+      Pessoa ocupante = pessoaService.getPessoEntityById(gavetaDto.getOcupante());
+      gaveta.setOcupante(ocupante);
     }
 
-    return gavetaRepository.save(gaveta);
+    gavetaMapper.updateFromDto(gavetaDto, gaveta);
+
+    return gavetaMapper.toDto(gavetaRepository.save(gaveta));
   }
 
   public void deleteGaveta(Long id) {
-    Gaveta gaveta = gavetaRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Gaveta não encontrada com id " + id));
+    Gaveta gaveta = this.getGavetaEntityById(id);
 
     gavetaRepository.delete(gaveta);
   }
+
+  public Gaveta getGavetaEntityById(Long id) {
+    return gavetaRepository.findById(id).orElseThrow(() -> new NotFoundException("Gaveta não econtrada com id " + id));
+  }
+
 }
