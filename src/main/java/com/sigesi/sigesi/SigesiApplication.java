@@ -15,8 +15,7 @@ public class SigesiApplication {
         .ignoreIfMissing()
         .load();
 
-    // Only set specific environment variables as system properties
-    String[] allowedKeys = {"MY_APP_CONFIG", "MY_APP_SECRET"}; // TODO: Replace with actual required keys
+    String[] allowedKeys = {"GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"};
     for (String key : allowedKeys) {
       String value = dotenv.get(key);
       if (value != null) {
