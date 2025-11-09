@@ -172,7 +172,7 @@ class CemiterioControllerTest {
     given(cemiterioService.updateCemiterio(eq(999L), any(CemiterioUpdateDTO.class)))
         .willThrow(new com.sigesi.sigesi.config.NotFoundException("Cemitério não encontrado com id 999"));
 
-    mockMvc.perform(put("/api/cemiterios/{id}", 999L)
+    mockMvc.perform(patch("/api/cemiterios/{id}", 999L)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isNotFound());
