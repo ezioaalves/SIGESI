@@ -15,9 +15,14 @@ public class SigesiApplication {
         .ignoreIfMissing()
         .load();
 
-    dotenv.entries().forEach(entry ->
-        System.setProperty(entry.getKey(), entry.getValue())
-    );
+    // Only set specific environment variables as system properties
+    String[] allowedKeys = {"MY_APP_CONFIG", "MY_APP_SECRET"}; // TODO: Replace with actual required keys
+    for (String key : allowedKeys) {
+      String value = dotenv.get(key);
+      if (value != null) {
+        System.setProperty(key, value);
+      }
+    }
 
     SpringApplication.run(SigesiApplication.class, args);
   }
