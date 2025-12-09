@@ -1,8 +1,8 @@
 services:
-  db_biblioteca:
+  db:
     image: postgres:17
     environment:
-      POSTGRES_DB: sigesi
+      POSTGRES_DB: db_app
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     volumes:
@@ -10,10 +10,20 @@ services:
     ports:
       - 5432:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d biblioteca"]
+      test: ["CMD-SHELL", "pg_isready -U user -d db_app"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
 
 volumes:
   sigesi_data:
