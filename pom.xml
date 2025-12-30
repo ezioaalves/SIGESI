@@ -31,6 +31,7 @@
         <!-- O Spring Boot Parent gerencia as versões, mas é bom ter a propriedade -->
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <postgresql.version>42.7.7</postgresql.version>
     </properties>
     <dependencies>
         <dependency>
@@ -80,7 +81,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.5</version> <!-- Compatible with Spring Boot 3.5.x -->
+            <version>2.8.14</version>
         </dependency>
 
         <!-- .env file loading -->

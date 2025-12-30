@@ -15,15 +15,15 @@ services:
       timeout: 5s
       retries: 5
 
-  # app:
-  #   build: .
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - 8080:8080
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
 
   minio:
     image: minio/minio:latest
