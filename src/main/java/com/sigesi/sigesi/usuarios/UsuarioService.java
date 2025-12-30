@@ -1,5 +1,6 @@
 package com.sigesi.sigesi.usuarios;
 
+import com.sigesi.sigesi.config.NotFoundException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +19,12 @@ public class UsuarioService {
 
   public Usuario getUsuarioById(Long id) {
     return usuarioRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id " + id));
+        .orElseThrow(() -> new NotFoundException("Usuário não encontrado com id " + id));
   }
 
   public Usuario toggleUsuarioAtivo(Long id) {
-    Usuario usuario = usuarioRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id " + id));
-
+    Usuario usuario = this.getUsuarioById(id);
     usuario.setAtivo(!usuario.getAtivo());
-
     return usuarioRepository.save(usuario);
   }
 
