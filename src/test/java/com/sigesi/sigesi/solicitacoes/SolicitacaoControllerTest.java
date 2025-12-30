@@ -59,7 +59,7 @@ class SolicitacaoControllerTest {
         .data(LocalDate.of(2025, 12, 29))
         .assunto(assunto)
         .body(body)
-        .anexo("/docs/test.pdf")
+        .anexo(null)
         .autor(autor)
         .local(local)
         .build();
@@ -69,7 +69,7 @@ class SolicitacaoControllerTest {
     SolicitacaoCreateDTO dto = new SolicitacaoCreateDTO();
     dto.setAssunto(assunto);
     dto.setBody(body);
-    dto.setAnexo("/docs/test.pdf");
+    dto.setAnexoId(null);
     dto.setAutorId(1L);
     dto.setLocalId(1L);
     return dto;
@@ -79,7 +79,7 @@ class SolicitacaoControllerTest {
     SolicitacaoUpdateDTO dto = new SolicitacaoUpdateDTO();
     dto.setAssunto(assunto);
     dto.setBody(body);
-    dto.setAnexo("/docs/updated.pdf");
+    dto.setAnexoId(null);
     dto.setAutorId(1L);
     dto.setLocalId(1L);
     return dto;

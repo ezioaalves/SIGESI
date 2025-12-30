@@ -1,5 +1,6 @@
 package com.sigesi.sigesi.solicitacoes;
 
+import com.sigesi.sigesi.arquivos.Arquivo;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
@@ -22,6 +23,7 @@ public interface SolicitacaoMapper {
   @Mapping(target = "data", ignore = true)
   @Mapping(target = "autor", source = "autorId")
   @Mapping(target = "local", source = "localId")
+  @Mapping(target = "anexo", source = "anexoId")
   Solicitacao toEntity(SolicitacaoCreateDTO dto);
 
   SolicitacaoResponseDTO toDto(Solicitacao entity);
@@ -32,6 +34,7 @@ public interface SolicitacaoMapper {
   @Mapping(target = "data", ignore = true)
   @Mapping(target = "autor", source = "autorId")
   @Mapping(target = "local", source = "localId")
+  @Mapping(target = "anexo", source = "anexoId")
   void updateFromDto(SolicitacaoUpdateDTO dto, @MappingTarget Solicitacao solicitacao);
 
   default Usuario mapAutor(Long autorId) {
@@ -46,5 +49,12 @@ public interface SolicitacaoMapper {
       return null;
     }
     return Endereco.builder().id(localId).build();
+  }
+
+  default Arquivo mapAnexo(Long anexoId) {
+    if (anexoId == null) {
+      return null;
+    }
+    return Arquivo.builder().id(anexoId).build();
   }
 }

@@ -23,8 +23,8 @@ public class SolicitacaoUpdateDTO {
   @Schema(description = "Descrição detalhada", example = "Detalhes da solicitação...")
   private String body;
 
-  @Schema(description = "Caminho do arquivo anexo", example = "/docs/anexo.pdf")
-  private String anexo;
+  @Schema(description = "ID do arquivo anexo", example = "1")
+  private Long anexoId;
 
   @NotNull(message = "Autor não pode ser nulo")
   @Schema(description = "ID do usuário autor", example = "1")
