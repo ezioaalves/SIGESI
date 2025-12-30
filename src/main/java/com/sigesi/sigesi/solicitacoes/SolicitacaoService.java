@@ -1,5 +1,6 @@
 package com.sigesi.sigesi.solicitacoes;
 
+import com.sigesi.sigesi.arquivos.ArquivoService;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.EnderecoService;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
@@ -29,6 +30,9 @@ public class SolicitacaoService {
   @Autowired
   private EnderecoService enderecoService;
 
+  @Autowired
+  private ArquivoService arquivoService;
+
   public List<SolicitacaoResponseDTO> getAll() {
     return solicitacaoRepository.findAllByOrderByIdAsc()
         .stream()
@@ -45,6 +49,10 @@ public class SolicitacaoService {
     usuarioService.getUsuarioById(dto.getAutorId());
     enderecoService.getEnderecoEntityById(dto.getLocalId());
 
+    if (dto.getAnexoId() != null) {
+      arquivoService.getArquivoEntityById(dto.getAnexoId());
+    }
+
     Solicitacao entity = solicitacaoMapper.toEntity(dto);
     Solicitacao saved = solicitacaoRepository.save(entity);
     return solicitacaoMapper.toDto(saved);
@@ -55,6 +63,10 @@ public class SolicitacaoService {
 
     usuarioService.getUsuarioById(dto.getAutorId());
     enderecoService.getEnderecoEntityById(dto.getLocalId());
+
+    if (dto.getAnexoId() != null) {
+      arquivoService.getArquivoEntityById(dto.getAnexoId());
+    }
 
     solicitacaoMapper.updateFromDto(dto, solicitacao);
     Solicitacao updated = solicitacaoRepository.save(solicitacao);
