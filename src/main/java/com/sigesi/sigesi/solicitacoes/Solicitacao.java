@@ -1,5 +1,6 @@
 package com.sigesi.sigesi.solicitacoes;
 
+import com.sigesi.sigesi.arquivos.Arquivo;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.usuarios.Usuario;
 import jakarta.persistence.Column;
@@ -43,7 +44,9 @@ public class Solicitacao {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String body;
 
-  private String anexo;
+  @ManyToOne
+  @JoinColumn(name = "anexo_id")
+  private Arquivo anexo;
 
   @NotNull(message = "Autor é obrigatório")
   @ManyToOne

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -47,7 +47,7 @@ class SolicitacaoControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
-  @MockBean
+  @MockitoBean
   private SolicitacaoService service;
 
   private SolicitacaoResponseDTO responseDto(Long id, String assunto, String body) {
@@ -59,7 +59,7 @@ class SolicitacaoControllerTest {
         .data(LocalDate.of(2025, 12, 29))
         .assunto(assunto)
         .body(body)
-        .anexo("/docs/test.pdf")
+        .anexo(null)
         .autor(autor)
         .local(local)
         .build();
@@ -69,7 +69,7 @@ class SolicitacaoControllerTest {
     SolicitacaoCreateDTO dto = new SolicitacaoCreateDTO();
     dto.setAssunto(assunto);
     dto.setBody(body);
-    dto.setAnexo("/docs/test.pdf");
+    dto.setAnexoId(null);
     dto.setAutorId(1L);
     dto.setLocalId(1L);
     return dto;
@@ -79,7 +79,7 @@ class SolicitacaoControllerTest {
     SolicitacaoUpdateDTO dto = new SolicitacaoUpdateDTO();
     dto.setAssunto(assunto);
     dto.setBody(body);
-    dto.setAnexo("/docs/updated.pdf");
+    dto.setAnexoId(null);
     dto.setAutorId(1L);
     dto.setLocalId(1L);
     return dto;

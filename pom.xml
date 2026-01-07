@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version> <!-- Use uma versão estável do Spring Boot. 3.5.7 é do futuro :) -->
+        <version>3.5.9</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.sigesi</groupId>
@@ -31,6 +31,7 @@
         <!-- O Spring Boot Parent gerencia as versões, mas é bom ter a propriedade -->
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <postgresql.version>42.7.7</postgresql.version>
     </properties>
     <dependencies>
         <dependency>
@@ -85,7 +86,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.5.0</version> <!-- Versão estável e compatível -->
+            <version>2.8.14</version>
         </dependency>
 
         <!-- .env file loading -->
@@ -94,6 +95,20 @@
 			<artifactId>spring-dotenv</artifactId>
 			<version>4.0.0</version>
 		</dependency>
+
+        <!-- MinIO Java SDK for object storage -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.6.0</version>
+        </dependency>
+
+        <!-- OkHttp (required by MinIO SDK) -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
 
         <!-- Teste -->
         <dependency>
@@ -104,6 +119,11 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

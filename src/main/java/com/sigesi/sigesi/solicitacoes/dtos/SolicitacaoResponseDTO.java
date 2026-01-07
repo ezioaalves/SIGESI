@@ -1,5 +1,6 @@
 package com.sigesi.sigesi.solicitacoes.dtos;
 
+import com.sigesi.sigesi.arquivos.dtos.ArquivoResponseDTO;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.usuarios.Usuario;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +31,7 @@ public class SolicitacaoResponseDTO {
   @NotBlank
   private String body;
 
-  private String anexo;
+  private ArquivoResponseDTO anexo;
 
   @NotNull
   private Usuario autor;
