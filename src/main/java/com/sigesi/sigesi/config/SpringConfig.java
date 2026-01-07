@@ -28,6 +28,7 @@ public class SpringConfig {
             .requestMatchers("/api/jazigos/**").hasAnyAuthority("OPERADOR", "ADMIN")
             .requestMatchers("/api/gavetas/**").hasAnyAuthority("OPERADOR", "ADMIN")
             .requestMatchers("/api/enderecos/**").hasAnyAuthority("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
+            .requestMatchers("/api/usuarios/me").authenticated()
             .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
             .anyRequest().authenticated())
         .oauth2Login(oauth2 -> oauth2
