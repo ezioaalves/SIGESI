@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import com.sigesi.sigesi.enderecos.Endereco;
-import com.sigesi.sigesi.enderecos.EnderecoRepository;
 import com.sigesi.sigesi.usuarios.Usuario;
 import com.sigesi.sigesi.usuarios.UsuarioRepository;
 import com.sigesi.sigesi.usuarios.enums.Role;
@@ -14,14 +12,12 @@ import com.sigesi.sigesi.usuarios.enums.Role;
 public class AdminUserInitializer implements CommandLineRunner {
 
   private final UsuarioRepository usuarioRepository;
-  private final EnderecoRepository enderecoRepository;
 
   @Value("${app.admin.email}")
   private String adminEmail;
 
-  public AdminUserInitializer(UsuarioRepository usuarioRepository, EnderecoRepository enderecoRepository) {
+  public AdminUserInitializer(UsuarioRepository usuarioRepository) {
     this.usuarioRepository = usuarioRepository;
-    this.enderecoRepository = enderecoRepository;
   }
 
   @Override
@@ -49,15 +45,5 @@ public class AdminUserInitializer implements CommandLineRunner {
 
               usuarioRepository.save(admin);
             });
-
-    if (enderecoRepository.count() == 0) {
-      Endereco endereco = Endereco.builder()
-          .logradouro("Rua Principal")
-          .numero("123")
-          .bairro("Centro")
-          .referencia("Perto da Praça")
-          .build();
-      enderecoRepository.save(endereco);
-    }
   }
 }
