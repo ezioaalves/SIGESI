@@ -28,6 +28,7 @@ public class UsuarioController {
   public Object me(Authentication auth) {
     CustomOAuth2User user = (CustomOAuth2User) auth.getPrincipal();
     return Map.of(
+        "id", user.getUser().getId(),
         "name", user.getUser().getName(),
         "email", user.getUser().getEmail(),
         "role", user.getUser().getRole(),

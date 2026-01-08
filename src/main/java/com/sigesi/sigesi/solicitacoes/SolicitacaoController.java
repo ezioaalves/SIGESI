@@ -29,7 +29,7 @@ public class SolicitacaoController {
   @Autowired
   private SolicitacaoService solicitacaoService;
 
-  @GetMapping("/")
+  @GetMapping
   public ResponseEntity<List<SolicitacaoResponseDTO>> listAll() {
     List<SolicitacaoResponseDTO> solicitacoes = solicitacaoService.getAll();
     return ResponseEntity.ok(solicitacoes);
@@ -41,7 +41,7 @@ public class SolicitacaoController {
     return ResponseEntity.ok(solicitacao);
   }
 
-  @PostMapping("/")
+  @PostMapping
   public ResponseEntity<SolicitacaoResponseDTO> createSolicitacao(
       @Valid @RequestBody SolicitacaoCreateDTO dto) {
     SolicitacaoResponseDTO result = solicitacaoService.createSolicitacao(dto);

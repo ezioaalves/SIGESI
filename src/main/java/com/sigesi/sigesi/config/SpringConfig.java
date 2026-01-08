@@ -22,12 +22,12 @@ public class SpringConfig {
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/enderecos/**").hasAnyAuthority("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
-            .requestMatchers("/api/solicitacoes/**").hasAnyAuthority("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
-            .requestMatchers("/api/cemiterios/**").hasAnyAuthority("OPERADOR", "ADMIN")
-            .requestMatchers("/api/jazigos/**").hasAnyAuthority("OPERADOR", "ADMIN")
-            .requestMatchers("/api/gavetas/**").hasAnyAuthority("OPERADOR", "ADMIN")
-            .requestMatchers("/api/enderecos/**").hasAnyAuthority("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
+            .requestMatchers("/api/enderecos/**").hasAnyRole("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
+            .requestMatchers("/api/solicitacoes/**").hasAnyRole("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
+            .requestMatchers("/api/cemiterios/**").hasAnyRole("OPERADOR", "ADMIN")
+            .requestMatchers("/api/jazigos/**").hasAnyRole("OPERADOR", "ADMIN")
+            .requestMatchers("/api/gavetas/**").hasAnyRole("OPERADOR", "ADMIN")
+            .requestMatchers("/api/enderecos/**").hasAnyRole("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
             .requestMatchers("/api/usuarios/me").authenticated()
             .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
             .anyRequest().authenticated())
