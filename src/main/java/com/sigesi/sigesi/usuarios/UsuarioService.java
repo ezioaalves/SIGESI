@@ -1,6 +1,8 @@
 package com.sigesi.sigesi.usuarios;
 
 import com.sigesi.sigesi.config.NotFoundException;
+import com.sigesi.sigesi.usuarios.enums.Role;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class UsuarioService {
             .pictureUrl(picture)
             .provider("google")
             .ativo(true)
+            .role(Role.CIDADAO)
             .build());
 
     return usuarioRepository.save(user);

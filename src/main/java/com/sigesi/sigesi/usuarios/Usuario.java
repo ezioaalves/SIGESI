@@ -1,6 +1,11 @@
 package com.sigesi.sigesi.usuarios;
 
+import com.sigesi.sigesi.usuarios.enums.Role;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,4 +29,9 @@ public class Usuario {
   private String pictureUrl;
   private String provider;
   private Boolean ativo;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Role role;
+
 }
