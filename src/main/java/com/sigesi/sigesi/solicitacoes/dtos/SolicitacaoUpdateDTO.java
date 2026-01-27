@@ -1,7 +1,8 @@
 package com.sigesi.sigesi.solicitacoes.dtos;
 
+import com.sigesi.sigesi.solicitacoes.SolicitacaoStatus;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,22 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SolicitacaoUpdateDTO {
 
-  @NotBlank(message = "Assunto não pode ser vazio")
-  @Schema(description = "Assunto da solicitação", example = "Solicitação de manutenção")
-  private String assunto;
+  @NotNull(message = "Status não pode ser vazio")
+  @Schema(description = "Status da solicitação", example = "ABERTO")
+  private SolicitacaoStatus status;
 
-  @NotBlank(message = "Corpo não pode ser vazio")
-  @Schema(description = "Descrição detalhada", example = "Detalhes da solicitação...")
-  private String body;
-
-  @Schema(description = "ID do arquivo anexo", example = "1")
-  private Long anexoId;
-
-  @NotNull(message = "Autor não pode ser nulo")
-  @Schema(description = "ID do usuário autor", example = "1")
-  private Long autorId;
-
-  @NotNull(message = "Local não pode ser nulo")
-  @Schema(description = "ID do endereço", example = "1")
-  private Long localId;
 }

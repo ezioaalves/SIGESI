@@ -28,6 +28,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     usuarioService.processOAuthPostLogin(
         (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal());
 
-    response.sendRedirect("http://localhost:3000/");
+    response.sendRedirect("http://localhost:3000/portal");
   }
 }

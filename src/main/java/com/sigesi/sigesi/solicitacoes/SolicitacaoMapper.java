@@ -15,8 +15,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 /**
  * Mapper para Solicitacao.
  */
-@Mapper(componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface SolicitacaoMapper {
 
   @Mapping(target = "id", ignore = true)
@@ -32,9 +31,12 @@ public interface SolicitacaoMapper {
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "data", ignore = true)
-  @Mapping(target = "autor", source = "autorId")
-  @Mapping(target = "local", source = "localId")
-  @Mapping(target = "anexo", source = "anexoId")
+  @Mapping(target = "status", source = "status")
+  @Mapping(target = "local", ignore = true)
+  @Mapping(target = "anexo", ignore = true)
+  @Mapping(target = "assunto", ignore = true)
+  @Mapping(target = "body", ignore = true)
+  @Mapping(target = "autor", ignore = true)
   void updateFromDto(SolicitacaoUpdateDTO dto, @MappingTarget Solicitacao solicitacao);
 
   default Usuario mapAutor(Long autorId) {
