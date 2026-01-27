@@ -2,6 +2,8 @@ package com.sigesi.sigesi.solicitacoes.dtos;
 
 import com.sigesi.sigesi.arquivos.dtos.ArquivoResponseDTO;
 import com.sigesi.sigesi.enderecos.Endereco;
+import com.sigesi.sigesi.solicitacoes.SolicitacaoAssunto;
+import com.sigesi.sigesi.solicitacoes.SolicitacaoStatus;
 import com.sigesi.sigesi.usuarios.Usuario;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +28,10 @@ public class SolicitacaoResponseDTO {
   private LocalDate data;
 
   @NotBlank
-  private String assunto;
+  private SolicitacaoAssunto assunto;
+
+  @NotBlank
+  private SolicitacaoStatus status;
 
   @NotBlank
   private String body;

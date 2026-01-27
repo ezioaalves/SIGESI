@@ -2,10 +2,12 @@ package com.sigesi.sigesi.solicitacoes;
 
 import com.sigesi.sigesi.arquivos.ArquivoService;
 import com.sigesi.sigesi.config.NotFoundException;
+import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoUpdateDTO;
+import com.sigesi.sigesi.usuarios.Usuario;
 import com.sigesi.sigesi.usuarios.UsuarioService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,27 +48,23 @@ public class SolicitacaoService {
   }
 
   public SolicitacaoResponseDTO createSolicitacao(SolicitacaoCreateDTO dto) {
-    usuarioService.getUsuarioById(dto.getAutorId());
-    enderecoService.getEnderecoEntityById(dto.getLocalId());
-
-    if (dto.getAnexoId() != null) {
-      arquivoService.getArquivoEntityById(dto.getAnexoId());
-    }
+    Usuario autor = usuarioService.getUsuarioById(dto.getAutorId());
+    Endereco local = enderecoService.getEnderecoEntityById(dto.getLocalId());
 
     Solicitacao entity = solicitacaoMapper.toEntity(dto);
+    entity.setAutor(autor);
+    entity.setLocal(local);
+
+    if (dto.getAnexoId() != null) {
+      entity.setAnexo(arquivoService.getArquivoEntityById(dto.getAnexoId()));
+    }
+
     Solicitacao saved = solicitacaoRepository.save(entity);
     return solicitacaoMapper.toDto(saved);
   }
 
   public SolicitacaoResponseDTO updateSolicitacao(Long id, SolicitacaoUpdateDTO dto) {
     Solicitacao solicitacao = this.getSolicitacaoEntityById(id);
-
-    usuarioService.getUsuarioById(dto.getAutorId());
-    enderecoService.getEnderecoEntityById(dto.getLocalId());
-
-    if (dto.getAnexoId() != null) {
-      arquivoService.getArquivoEntityById(dto.getAnexoId());
-    }
 
     solicitacaoMapper.updateFromDto(dto, solicitacao);
     Solicitacao updated = solicitacaoRepository.save(solicitacao);

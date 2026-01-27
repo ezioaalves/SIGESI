@@ -5,6 +5,8 @@ import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.usuarios.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,9 +38,9 @@ public class Solicitacao {
   @Column(nullable = false)
   private LocalDate data;
 
-  @NotBlank(message = "Assunto é obrigatório")
-  @Column(nullable = false)
-  private String assunto;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "assunto")
+  private SolicitacaoAssunto assunto;
 
   @NotBlank(message = "Corpo é obrigatório")
   @Column(nullable = false, columnDefinition = "TEXT")
@@ -57,6 +59,10 @@ public class Solicitacao {
   @ManyToOne
   @JoinColumn(name = "local_id", nullable = false)
   private Endereco local;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status")
+  private SolicitacaoStatus status;
 
   @PrePersist
   protected void onCreate() {
