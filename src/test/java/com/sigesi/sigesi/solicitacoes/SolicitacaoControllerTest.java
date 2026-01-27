@@ -104,9 +104,9 @@ class SolicitacaoControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].id", is(1)))
-        .andExpect(jsonPath("$[0].assunto", is(SolicitacaoAssunto.BURACO)))
+        .andExpect(jsonPath("$[0].assunto", is("BURACO")))
         .andExpect(jsonPath("$[1].id", is(2)))
-        .andExpect(jsonPath("$[1].assunto", is(SolicitacaoAssunto.ESGOTO)));
+        .andExpect(jsonPath("$[1].assunto", is("ESGOTO")));
   }
 
   @Test
@@ -120,7 +120,7 @@ class SolicitacaoControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.assunto", is(SolicitacaoAssunto.ESGOTO)))
+        .andExpect(jsonPath("$.assunto", is("ESGOTO")))
         .andExpect(jsonPath("$.body", is("Test Body")));
   }
 
@@ -148,14 +148,14 @@ class SolicitacaoControllerTest {
         .andExpect(status().isCreated())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.assunto", is(SolicitacaoAssunto.BURACO)))
+        .andExpect(jsonPath("$.assunto", is("BURACO")))
         .andExpect(jsonPath("$.body", is("Novo Corpo")));
   }
 
   @Test
   @DisplayName("POST /api/solicitacoes/ retorna 400 quando assunto está vazio")
   void testCreateRetorna400QuandoAssuntoVazio() throws Exception {
-    SolicitacaoCreateDTO createDto = createDto(SolicitacaoAssunto.BURACO, "Corpo válido");
+    SolicitacaoCreateDTO createDto = createDto(null, "Corpo válido");
 
     mockMvc.perform(post("/api/solicitacoes/")
         .contentType(MediaType.APPLICATION_JSON)
@@ -189,7 +189,7 @@ class SolicitacaoControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.assunto", is(SolicitacaoAssunto.BURACO)))
+        .andExpect(jsonPath("$.assunto", is("BURACO")))
         .andExpect(jsonPath("$.body", is("Corpo Atualizado")));
   }
 
