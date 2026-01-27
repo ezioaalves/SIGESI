@@ -65,23 +65,18 @@ class SolicitacaoControllerTest {
         .build();
   }
 
-  private SolicitacaoCreateDTO createDto(String assunto, String body) {
+  private SolicitacaoCreateDTO createDto(SolicitacaoAssunto assunto, String body) {
     SolicitacaoCreateDTO dto = new SolicitacaoCreateDTO();
-    // dto.setAssunto(assunto);
-    // dto.setBody(body);
-    // dto.setAnexoId(null);
-    // dto.setAutorId(1L);
-    // dto.setLocalId(1L);
+    dto.setAssunto(assunto);
+    dto.setBody(body);
+    dto.setAnexoId(null);
+    dto.setAutorId(1L);
+    dto.setLocalId(1L);
     return dto;
   }
 
-  private SolicitacaoUpdateDTO updateDto(String assunto, String body) {
-    SolicitacaoUpdateDTO dto = new SolicitacaoUpdateDTO();
-    // dto.setAssunto(assunto);
-    // dto.setBody(body);
-    // dto.setAnexoId(null);
-    // dto.setAutorId(1L);
-    // dto.setLocalId(1L);
+  private SolicitacaoUpdateDTO updateDto(SolicitacaoStatus status) {
+    SolicitacaoUpdateDTO dto = new SolicitacaoUpdateDTO(status);
     return dto;
   }
 
@@ -142,7 +137,7 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("POST /api/solicitacoes/ retorna 201 quando criada com sucesso")
   void testCreateRetorna201QuandoCriadaComSucesso() throws Exception {
-    SolicitacaoCreateDTO createDto = createDto("Novo Assunto", "Novo Corpo");
+    SolicitacaoCreateDTO createDto = createDto(SolicitacaoAssunto.BURACO, "Novo Corpo");
     SolicitacaoResponseDTO responseDto = responseDto(1L, SolicitacaoAssunto.BURACO, "Novo Corpo");
 
     given(service.createSolicitacao(any(SolicitacaoCreateDTO.class))).willReturn(responseDto);
@@ -160,7 +155,7 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("POST /api/solicitacoes/ retorna 400 quando assunto está vazio")
   void testCreateRetorna400QuandoAssuntoVazio() throws Exception {
-    SolicitacaoCreateDTO createDto = createDto("", "Corpo válido");
+    SolicitacaoCreateDTO createDto = createDto(SolicitacaoAssunto.BURACO, "Corpo válido");
 
     mockMvc.perform(post("/api/solicitacoes/")
         .contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +166,7 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("POST /api/solicitacoes/ retorna 400 quando body está vazio")
   void testCreateRetorna400QuandoBodyVazio() throws Exception {
-    SolicitacaoCreateDTO createDto = createDto("Assunto válido", "");
+    SolicitacaoCreateDTO createDto = createDto(SolicitacaoAssunto.BURACO, "");
 
     mockMvc.perform(post("/api/solicitacoes/")
         .contentType(MediaType.APPLICATION_JSON)
@@ -182,7 +177,7 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("PATCH /api/solicitacoes/{id} retorna 200 com dados atualizados")
   void testUpdateRetorna200ComDadosAtualizados() throws Exception {
-    SolicitacaoUpdateDTO updateDto = updateDto("Assunto Atualizado", "Corpo Atualizado");
+    SolicitacaoUpdateDTO updateDto = updateDto(SolicitacaoStatus.ABERTA);
     SolicitacaoResponseDTO responseDto = responseDto(1L, SolicitacaoAssunto.BURACO, "Corpo Atualizado");
 
     given(service.updateSolicitacao(eq(1L), any(SolicitacaoUpdateDTO.class)))
@@ -201,7 +196,7 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("PATCH /api/solicitacoes/{id} retorna 404 quando recurso não existe")
   void testUpdateRetorna404QuandoRecursoNaoExiste() throws Exception {
-    SolicitacaoUpdateDTO updateDto = updateDto("Assunto", "Corpo");
+    SolicitacaoUpdateDTO updateDto = updateDto(SolicitacaoStatus.ABERTA);
 
     given(service.updateSolicitacao(eq(999L), any(SolicitacaoUpdateDTO.class)))
         .willThrow(new NotFoundException("Solicitação não encontrada com id 999"));

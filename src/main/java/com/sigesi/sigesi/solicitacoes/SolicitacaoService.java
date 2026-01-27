@@ -54,6 +54,7 @@ public class SolicitacaoService {
     Solicitacao entity = solicitacaoMapper.toEntity(dto);
     entity.setAutor(autor);
     entity.setLocal(local);
+    entity.setStatus(SolicitacaoStatus.ABERTA);
 
     if (dto.getAnexoId() != null) {
       entity.setAnexo(arquivoService.getArquivoEntityById(dto.getAnexoId()));

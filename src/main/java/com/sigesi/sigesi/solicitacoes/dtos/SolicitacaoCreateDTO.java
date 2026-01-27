@@ -1,7 +1,6 @@
 package com.sigesi.sigesi.solicitacoes.dtos;
 
 import com.sigesi.sigesi.solicitacoes.SolicitacaoAssunto;
-import com.sigesi.sigesi.solicitacoes.SolicitacaoStatus;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,9 +18,6 @@ public class SolicitacaoCreateDTO {
 
   @NotNull(message = "Assunto é obrigatório")
   private SolicitacaoAssunto assunto;
-
-  @NotNull(message = "Status é obrigatório")
-  private SolicitacaoStatus status;
 
   @NotBlank(message = "Corpo é obrigatório")
   private String body;
