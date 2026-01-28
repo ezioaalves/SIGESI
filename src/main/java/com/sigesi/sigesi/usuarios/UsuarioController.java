@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sigesi.sigesi.authentication.CustomOAuth2User;
 import com.sigesi.sigesi.usuarios.dtos.UsuarioUpdateDTO;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
