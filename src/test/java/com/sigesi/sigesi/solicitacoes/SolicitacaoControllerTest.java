@@ -50,7 +50,7 @@ class SolicitacaoControllerTest {
   @MockitoBean
   private SolicitacaoService service;
 
-  private SolicitacaoResponseDTO responseDto(Long id, String assunto, String body) {
+  private SolicitacaoResponseDTO responseDto(Long id, SolicitacaoAssunto assunto, String body) {
     Usuario autor = Usuario.builder().id(1L).email("test@test.com").build();
     Endereco local = Endereco.builder().id(1L).logradouro("Rua Test").build();
 
@@ -65,7 +65,7 @@ class SolicitacaoControllerTest {
         .build();
   }
 
-  private SolicitacaoCreateDTO createDto(String assunto, String body) {
+  private SolicitacaoCreateDTO createDto(SolicitacaoAssunto assunto, String body) {
     SolicitacaoCreateDTO dto = new SolicitacaoCreateDTO();
     dto.setAssunto(assunto);
     dto.setBody(body);
@@ -75,13 +75,8 @@ class SolicitacaoControllerTest {
     return dto;
   }
 
-  private SolicitacaoUpdateDTO updateDto(String assunto, String body) {
-    SolicitacaoUpdateDTO dto = new SolicitacaoUpdateDTO();
-    dto.setAssunto(assunto);
-    dto.setBody(body);
-    dto.setAnexoId(null);
-    dto.setAutorId(1L);
-    dto.setLocalId(1L);
+  private SolicitacaoUpdateDTO updateDto(SolicitacaoStatus status) {
+    SolicitacaoUpdateDTO dto = new SolicitacaoUpdateDTO(status);
     return dto;
   }
 
@@ -99,8 +94,8 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("GET /api/solicitacoes/ retorna 200 com múltiplas solicitações")
   void testListAllRetorna200ComMultiplasSolicitacoes() throws Exception {
-    SolicitacaoResponseDTO dto1 = responseDto(1L, "Assunto 1", "Corpo 1");
-    SolicitacaoResponseDTO dto2 = responseDto(2L, "Assunto 2", "Corpo 2");
+    SolicitacaoResponseDTO dto1 = responseDto(1L, SolicitacaoAssunto.BURACO, "Corpo 1");
+    SolicitacaoResponseDTO dto2 = responseDto(2L, SolicitacaoAssunto.ESGOTO, "Corpo 2");
 
     given(service.getAll()).willReturn(List.of(dto1, dto2));
 
@@ -109,15 +104,15 @@ class SolicitacaoControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].id", is(1)))
-        .andExpect(jsonPath("$[0].assunto", is("Assunto 1")))
+        .andExpect(jsonPath("$[0].assunto", is("BURACO")))
         .andExpect(jsonPath("$[1].id", is(2)))
-        .andExpect(jsonPath("$[1].assunto", is("Assunto 2")));
+        .andExpect(jsonPath("$[1].assunto", is("ESGOTO")));
   }
 
   @Test
   @DisplayName("GET /api/solicitacoes/{id} retorna 200 com solicitação encontrada")
   void testGetByIdRetorna200QuandoEncontrada() throws Exception {
-    SolicitacaoResponseDTO dto = responseDto(1L, "Test Assunto", "Test Body");
+    SolicitacaoResponseDTO dto = responseDto(1L, SolicitacaoAssunto.ESGOTO, "Test Body");
 
     given(service.getSolicitacaoById(1L)).willReturn(dto);
 
@@ -125,7 +120,7 @@ class SolicitacaoControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.assunto", is("Test Assunto")))
+        .andExpect(jsonPath("$.assunto", is("ESGOTO")))
         .andExpect(jsonPath("$.body", is("Test Body")));
   }
 
@@ -142,8 +137,8 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("POST /api/solicitacoes/ retorna 201 quando criada com sucesso")
   void testCreateRetorna201QuandoCriadaComSucesso() throws Exception {
-    SolicitacaoCreateDTO createDto = createDto("Novo Assunto", "Novo Corpo");
-    SolicitacaoResponseDTO responseDto = responseDto(1L, "Novo Assunto", "Novo Corpo");
+    SolicitacaoCreateDTO createDto = createDto(SolicitacaoAssunto.BURACO, "Novo Corpo");
+    SolicitacaoResponseDTO responseDto = responseDto(1L, SolicitacaoAssunto.BURACO, "Novo Corpo");
 
     given(service.createSolicitacao(any(SolicitacaoCreateDTO.class))).willReturn(responseDto);
 
@@ -153,14 +148,14 @@ class SolicitacaoControllerTest {
         .andExpect(status().isCreated())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.assunto", is("Novo Assunto")))
+        .andExpect(jsonPath("$.assunto", is("BURACO")))
         .andExpect(jsonPath("$.body", is("Novo Corpo")));
   }
 
   @Test
   @DisplayName("POST /api/solicitacoes/ retorna 400 quando assunto está vazio")
   void testCreateRetorna400QuandoAssuntoVazio() throws Exception {
-    SolicitacaoCreateDTO createDto = createDto("", "Corpo válido");
+    SolicitacaoCreateDTO createDto = createDto(null, "Corpo válido");
 
     mockMvc.perform(post("/api/solicitacoes/")
         .contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +166,7 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("POST /api/solicitacoes/ retorna 400 quando body está vazio")
   void testCreateRetorna400QuandoBodyVazio() throws Exception {
-    SolicitacaoCreateDTO createDto = createDto("Assunto válido", "");
+    SolicitacaoCreateDTO createDto = createDto(SolicitacaoAssunto.BURACO, "");
 
     mockMvc.perform(post("/api/solicitacoes/")
         .contentType(MediaType.APPLICATION_JSON)
@@ -182,9 +177,8 @@ class SolicitacaoControllerTest {
   @Test
   @DisplayName("PATCH /api/solicitacoes/{id} retorna 200 com dados atualizados")
   void testUpdateRetorna200ComDadosAtualizados() throws Exception {
-    SolicitacaoUpdateDTO updateDto = updateDto("Assunto Atualizado", "Corpo Atualizado");
-    SolicitacaoResponseDTO responseDto =
-        responseDto(1L, "Assunto Atualizado", "Corpo Atualizado");
+    SolicitacaoUpdateDTO updateDto = updateDto(SolicitacaoStatus.ABERTA);
+    SolicitacaoResponseDTO responseDto = responseDto(1L, SolicitacaoAssunto.BURACO, "Corpo Atualizado");
 
     given(service.updateSolicitacao(eq(1L), any(SolicitacaoUpdateDTO.class)))
         .willReturn(responseDto);
@@ -195,14 +189,14 @@ class SolicitacaoControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(1)))
-        .andExpect(jsonPath("$.assunto", is("Assunto Atualizado")))
+        .andExpect(jsonPath("$.assunto", is("BURACO")))
         .andExpect(jsonPath("$.body", is("Corpo Atualizado")));
   }
 
   @Test
   @DisplayName("PATCH /api/solicitacoes/{id} retorna 404 quando recurso não existe")
   void testUpdateRetorna404QuandoRecursoNaoExiste() throws Exception {
-    SolicitacaoUpdateDTO updateDto = updateDto("Assunto", "Corpo");
+    SolicitacaoUpdateDTO updateDto = updateDto(SolicitacaoStatus.ABERTA);
 
     given(service.updateSolicitacao(eq(999L), any(SolicitacaoUpdateDTO.class)))
         .willThrow(new NotFoundException("Solicitação não encontrada com id 999"));
