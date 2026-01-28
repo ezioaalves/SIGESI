@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sigesi.sigesi.authentication.CustomOAuth2User;
+import com.sigesi.sigesi.usuarios.dtos.UsuarioUpdateDTO;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -51,6 +54,14 @@ public class UsuarioController {
   public ResponseEntity<Usuario> toggleAtivo(@PathVariable Long id) {
     Usuario usuarioAtualizado = usuarioService.toggleUsuarioAtivo(id);
     return ResponseEntity.ok(usuarioAtualizado);
+  }
+
+  @PatchMapping("/{id}/role")
+  public ResponseEntity<Usuario> updateRoleUsuario(@PathVariable Long id,
+      @Valid @RequestBody UsuarioUpdateDTO usuarioUpdateDTO) {
+
+    Usuario usuario = usuarioService.updateUsuario(id, usuarioUpdateDTO);
+    return ResponseEntity.ok(usuario);
   }
 
 }
