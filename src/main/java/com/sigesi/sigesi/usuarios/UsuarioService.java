@@ -1,6 +1,7 @@
 package com.sigesi.sigesi.usuarios;
 
 import com.sigesi.sigesi.config.NotFoundException;
+import com.sigesi.sigesi.usuarios.dtos.UsuarioUpdateDTO;
 import com.sigesi.sigesi.usuarios.enums.Role;
 
 import java.util.List;
@@ -15,6 +16,9 @@ public class UsuarioService {
   @Autowired
   private UsuarioRepository usuarioRepository;
 
+  @Autowired
+  private UsuarioMapper usuarioMapper;
+
   public List<Usuario> getAll() {
     return usuarioRepository.findAll();
   }
@@ -27,6 +31,14 @@ public class UsuarioService {
   public Usuario toggleUsuarioAtivo(Long id) {
     Usuario usuario = this.getUsuarioById(id);
     usuario.setAtivo(!usuario.getAtivo());
+    return usuarioRepository.save(usuario);
+  }
+
+  public Usuario updateUsuario(Long id, UsuarioUpdateDTO usuarioUpdateDTO) {
+    Usuario usuario = this.getUsuarioById(id);
+
+    usuarioMapper.updateFromDto(usuarioUpdateDTO, usuario);
+
     return usuarioRepository.save(usuario);
   }
 
