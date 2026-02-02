@@ -1,13 +1,16 @@
 package com.sigesi.sigesi.gavetas.dtos;
 
+import com.sigesi.sigesi.jazigos.Jazigo;
+import com.sigesi.sigesi.pessoas.Pessoa;
+
 import lombok.Data;
 
 @Data
 public class GavetaResponseDTO {
 
   private Long id;
-  private Long jazigo;
+  private Jazigo jazigo;
   private Integer numero;
-  private Long ocupante;
+  private Pessoa ocupante;
 
 }

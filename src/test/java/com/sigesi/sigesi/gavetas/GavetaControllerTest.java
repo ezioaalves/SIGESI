@@ -21,9 +21,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sigesi.sigesi.cemiterios.Cemiterio;
+import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.gavetas.dtos.GavetaCreateDTO;
 import com.sigesi.sigesi.gavetas.dtos.GavetaResponseDTO;
 import com.sigesi.sigesi.gavetas.dtos.GavetaUpdateDTO;
+import com.sigesi.sigesi.jazigos.Jazigo;
+import com.sigesi.sigesi.pessoas.Pessoa;
+import com.sigesi.sigesi.pessoas.SexoEnum;
 
 @WebMvcTest(controllers = GavetaController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -40,12 +45,56 @@ class GavetaControllerTest {
   private GavetaService gavetaService;
 
   // ===== Métodos auxiliares =====
+  //
+
+  private Endereco createEndereco() {
+    return Endereco.builder()
+        .id(1L)
+        .logradouro("Rua das Flores")
+        .numero("100")
+        .bairro("Centro")
+        .referencia("No centro")
+        .build();
+
+  }
+
+  private Cemiterio createCemiterio() {
+    return Cemiterio.builder()
+        .id(1L)
+        .nome("Cemiterio Teste")
+        .endereco(createEndereco())
+        .build();
+
+  }
+
+  private Jazigo jazigoCreateDTO() {
+    return Jazigo.builder()
+        .cemiterio(createCemiterio())
+        .comprimento(1.0)
+        .largura(1.0)
+        .quadra(10)
+        .rua("")
+        .lote("Lote 1")
+        .build();
+
+  }
+
+  private Pessoa creteOcupante() {
+    return Pessoa.builder()
+        .id(1L)
+        .nome("Fulano")
+        .cpf("00000000000")
+        .sexo(SexoEnum.MASCULINO)
+        .endereco(createEndereco())
+        .build();
+  }
+
   private GavetaResponseDTO gavetaDTO(Long id, Integer numero) {
     GavetaResponseDTO dto = new GavetaResponseDTO();
     dto.setId(id);
-    dto.setJazigo(1L);
+    dto.setJazigo(jazigoCreateDTO());
     dto.setNumero(numero);
-    dto.setOcupante(1L);
+    dto.setOcupante(creteOcupante());
     return dto;
   }
 
