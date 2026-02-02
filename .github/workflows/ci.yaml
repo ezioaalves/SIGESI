@@ -33,9 +33,7 @@ jobs:
   cd:
     name: CD - Docker Build & Push
     runs-on: ubuntu-latest
-
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     needs: ci
 
     steps:
@@ -56,6 +54,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/sigesi-backend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/sigesi-backend:${{ github.sha }}
-
-
-
