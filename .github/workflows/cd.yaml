@@ -45,7 +45,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           source: "compose-prod.yaml"
-          target: "~/sigesi/"
+          target: "~/marcelo/sigesi/"
 
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v0.1.5
