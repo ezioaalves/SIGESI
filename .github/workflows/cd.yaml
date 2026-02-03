@@ -64,6 +64,9 @@ jobs:
             export DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             export MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
             export MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
+            export GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            export GOOGLE_CLIENT_SECRET=${{ secrets. GOOGLE_CLIENT_SECRET }}
+            export ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
 
             cd ~/pipeline/sigesi
 
