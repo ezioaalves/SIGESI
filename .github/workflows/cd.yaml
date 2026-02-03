@@ -59,17 +59,22 @@ jobs:
           port: 22
           debug: true
           script: |
-            export DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            export DATABASE_USER=${{ secrets.DATABASE_USER }}
-            export DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            export MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
-            export MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
-            export GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            export GOOGLE_CLIENT_SECRET=${{ secrets. GOOGLE_CLIENT_SECRET }}
-            export ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+              cat > ~/sigesi/.env <<EOF
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
+            MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            EOF
 
-            cd ~/pipeline/sigesi
+            # Verifica se o arquivo .env foi criado corretamente
+            cat ~/sigesi/.env
 
+            # Roda o docker compose
+            cd ~/sigesi
             docker compose -f compose-prod.yaml pull
             docker compose -f compose-prod.yaml up -d
             docker compose -f compose-prod.yaml ps
