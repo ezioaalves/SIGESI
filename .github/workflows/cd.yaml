@@ -50,6 +50,16 @@ jobs:
           source: "compose-prod.yaml"
           target: "~/pipeline/sigesi"
 
+      - name: Copy nginx.conf to VPS
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "nginx.conf"
+          target: "~/pipeline/sigesi"
+
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v0.1.5
         with:
