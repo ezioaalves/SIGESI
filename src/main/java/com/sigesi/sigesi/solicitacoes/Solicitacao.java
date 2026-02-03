@@ -47,7 +47,11 @@ public class Solicitacao {
   private String body;
 
   @jakarta.persistence.ManyToMany
-  @jakarta.persistence.JoinTable(name = "solicitacao_arquivos", joinColumns = @jakarta.persistence.JoinColumn(name = "solicitacao_id"), inverseJoinColumns = @jakarta.persistence.JoinColumn(name = "arquivo_id"))
+// @formatter:off
+  @jakarta.persistence.JoinTable(name = "solicitacao_arquivos",
+    joinColumns = @jakarta.persistence.JoinColumn(name = "solicitacao_id"),
+    inverseJoinColumns = @jakarta.persistence.JoinColumn(name = "arquivo_id"))
+// @formatter:on
   private java.util.List<Arquivo> anexos;
 
   @NotNull(message = "Autor é obrigatório")
