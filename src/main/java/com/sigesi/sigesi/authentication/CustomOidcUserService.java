@@ -17,10 +17,17 @@ public class CustomOidcUserService extends OidcUserService {
   private UsuarioService usuarioService;
 
   @Override
-  public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+  public OidcUser loadUser(OidcUserRequest userRequest)
+      throws OAuth2AuthenticationException {
+
     OidcUser oidcUser = super.loadUser(userRequest);
 
     Usuario user = usuarioService.processOAuthPostLogin(oidcUser);
+
+    if (!user.getAtivo()) {
+      throw new OAuth2AuthenticationException(
+          "Usuário inativo. Aguardando liberação.");
+    }
 
     return new CustomOAuth2User(oidcUser, user);
   }
