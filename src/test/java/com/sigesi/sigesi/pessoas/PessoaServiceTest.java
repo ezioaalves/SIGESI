@@ -218,7 +218,8 @@ class PessoaServiceTest {
     when(pessoaRepository.findById(999L)).thenReturn(Optional.empty());
 
     assertThrows(NotFoundException.class, () -> pessoaService.deletePessoa(999L));
-    verify(pessoaRepository, never()).delete(any());
+
+    verify(pessoaRepository, never()).delete(any(Pessoa.class));
   }
 
   @Test
