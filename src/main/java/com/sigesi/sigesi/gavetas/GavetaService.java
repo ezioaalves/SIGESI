@@ -37,6 +37,25 @@ public class GavetaService {
         .collect(Collectors.toList());
   }
 
+  public List<GavetaResponseDTO> getAllFiltered(Long jazigoId, Long ocupanteId) {
+    List<Gaveta> gavetas;
+
+    if (jazigoId != null && ocupanteId != null) {
+      gavetas = gavetaRepository.findByJazigoIdAndOcupanteId(jazigoId, ocupanteId);
+    } else if (jazigoId != null) {
+      gavetas = gavetaRepository.findByJazigoId(jazigoId);
+    } else if (ocupanteId != null) {
+      gavetas = gavetaRepository.findByOcupanteId(ocupanteId);
+    } else {
+      gavetas = gavetaRepository.findAll();
+    }
+
+    return gavetas.stream()
+        .map(gavetaMapper::toDto)
+        .toList();
+
+  }
+
   public GavetaResponseDTO getGavetaById(Long id) {
     Gaveta gaveta = this.getGavetaEntityById(id);
 
