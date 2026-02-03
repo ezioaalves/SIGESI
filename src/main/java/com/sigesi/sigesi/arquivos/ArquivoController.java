@@ -68,6 +68,25 @@ public class ArquivoController {
   }
 
   /**
+   * Download file content via proxy.
+   */
+  @GetMapping("/{id}/download")
+  public ResponseEntity<org.springframework.core.io.Resource> downloadFile(@PathVariable Long id) {
+    System.out.println("Processing download request for file ID: " + id);
+    ArquivoResponseDTO metadata = arquivoService.getFileMetadata(id);
+    java.io.InputStream inputStream = arquivoService.downloadFile(id);
+
+    org.springframework.core.io.InputStreamResource resource = new org.springframework.core.io.InputStreamResource(
+        inputStream);
+
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(metadata.getContentType()))
+        .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + metadata.getNomeOriginal() + "\"")
+        .body(resource);
+  }
+
+  /**
    * Delete file.
    */
   @DeleteMapping("/{id}")

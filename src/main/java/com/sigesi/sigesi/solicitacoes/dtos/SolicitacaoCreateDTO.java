@@ -22,7 +22,7 @@ public class SolicitacaoCreateDTO {
   @NotBlank(message = "Corpo é obrigatório")
   private String body;
 
-  private Long anexoId;
+  private java.util.List<Long> anexoIds;
 
   @NotNull(message = "Autor é obrigatório")
   private Long autorId;

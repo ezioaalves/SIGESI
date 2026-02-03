@@ -36,7 +36,7 @@ public class SolicitacaoResponseDTO {
   @NotBlank
   private String body;
 
-  private ArquivoResponseDTO anexo;
+  private java.util.List<ArquivoResponseDTO> anexos;
 
   @NotNull
   private Usuario autor;
