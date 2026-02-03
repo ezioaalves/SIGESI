@@ -3,6 +3,8 @@ name: Build, Push and Deploy
 on:
   push:
     branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
 
 jobs:
   build-and-push:
