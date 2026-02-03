@@ -115,6 +115,17 @@ public class ArquivoService {
   }
 
   /**
+   * Download file content.
+   */
+  @Transactional(readOnly = true)
+  public java.io.InputStream downloadFile(Long id) {
+    Arquivo arquivo = arquivoRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Arquivo não encontrado com id " + id));
+
+    return minioService.downloadFile(arquivo.getStorageKey());
+  }
+
+  /**
    * Delete file (metadata and storage).
    */
   @Transactional

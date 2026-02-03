@@ -56,8 +56,11 @@ public class SolicitacaoService {
     entity.setLocal(local);
     entity.setStatus(SolicitacaoStatus.ABERTA);
 
-    if (dto.getAnexoId() != null) {
-      entity.setAnexo(arquivoService.getArquivoEntityById(dto.getAnexoId()));
+    if (dto.getAnexoIds() != null && !dto.getAnexoIds().isEmpty()) {
+      List<com.sigesi.sigesi.arquivos.Arquivo> anexos = dto.getAnexoIds().stream()
+          .map(id -> arquivoService.getArquivoEntityById(id))
+          .collect(Collectors.toList());
+      entity.setAnexos(anexos);
     }
 
     Solicitacao saved = solicitacaoRepository.save(entity);
