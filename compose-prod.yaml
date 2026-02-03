@@ -14,7 +14,7 @@ services:
       retries: 5
 
   app:
-    image: yourdockerhubusername/sigesi:latest
+    image: marcosqf/sigesi-backend:latest
     depends_on:
       db:
         condition: service_healthy

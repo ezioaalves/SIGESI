@@ -59,7 +59,14 @@ jobs:
           port: 22
           debug: true
           script: |
+            export DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            export DATABASE_USER=${{ secrets.DATABASE_USER }}
+            export DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            export MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
+            export MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
+
             cd ~/pipeline/sigesi
+
             docker compose -f compose-prod.yaml pull
             docker compose -f compose-prod.yaml up -d
             docker compose -f compose-prod.yaml ps
