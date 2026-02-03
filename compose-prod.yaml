@@ -52,13 +52,6 @@ services:
       - "3000"
     restart: always
 
-  frontend:
-    image: marcosqf/sigesi-frontend:latest
-    container_name: sigesi-frontend
-    depends_on:
-      app
-    restart: always
-
   minio:
     image: minio/minio:latest
     container_name: sigesi-minio
