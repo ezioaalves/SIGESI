@@ -110,7 +110,7 @@ class GavetaControllerTest {
   @Test
   @DisplayName("GET /api/gavetas/ retorna 200 com lista vazia")
   void testListAllRetorna200ComListaVazia() throws Exception {
-    given(gavetaService.getAll()).willReturn(List.of());
+    given(gavetaService.getAllFiltered(null, null)).willReturn(List.of());
 
     mockMvc.perform(get("/api/gavetas/").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -123,7 +123,7 @@ class GavetaControllerTest {
   void testListAllRetorna200ComGavetas() throws Exception {
     var g1 = gavetaDTO(1L, 1);
     var g2 = gavetaDTO(2L, 2);
-    given(gavetaService.getAll()).willReturn(List.of(g1, g2));
+    given(gavetaService.getAllFiltered(null, null)).willReturn(List.of(g1, g2));
 
     mockMvc.perform(get("/api/gavetas/").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
