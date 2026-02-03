@@ -7,8 +7,10 @@ import com.sigesi.sigesi.usuarios.enums.Role;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UsuarioService {
@@ -19,8 +21,16 @@ public class UsuarioService {
   @Autowired
   private UsuarioMapper usuarioMapper;
 
+  private void validarUsuarioEditavel(Long id) {
+    if (id == 1) {
+      throw new ResponseStatusException(
+          HttpStatus.FORBIDDEN,
+          "Não é permitido realizar essa ação para este usuário");
+    }
+  }
+
   public List<Usuario> getAll() {
-    return usuarioRepository.findAll();
+    return usuarioRepository.findByIdNot(1L);
   }
 
   public Usuario getUsuarioById(Long id) {
@@ -29,12 +39,16 @@ public class UsuarioService {
   }
 
   public Usuario toggleUsuarioAtivo(Long id) {
+    validarUsuarioEditavel(id);
+
     Usuario usuario = this.getUsuarioById(id);
     usuario.setAtivo(!usuario.getAtivo());
     return usuarioRepository.save(usuario);
   }
 
   public Usuario updateUsuario(Long id, UsuarioUpdateDTO usuarioUpdateDTO) {
+    validarUsuarioEditavel(id);
+
     Usuario usuario = this.getUsuarioById(id);
 
     usuarioMapper.updateFromDto(usuarioUpdateDTO, usuario);
