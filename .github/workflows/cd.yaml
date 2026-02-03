@@ -62,13 +62,13 @@ jobs:
 
             cd ~/pipeline/sigesi
 
-            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" > ~/.env
-            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> ~/.env
-            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> ~/.env
-            echo "MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}" >> ~/.env
-            echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> ~/.env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> ~/.env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ~/.env
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" > ~/pipeline/sigesi/.env
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> ~/pipeline/sigesi/.env
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> ~/pipeline/sigesi/.env
+            echo "MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}" >> ~/pipeline/sigesi/.env
+            echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> ~/pipeline/sigesi/.env
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> ~/pipeline/sigesi/.env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ~/pipeline/sigesi/.env
             echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> ~/.env
 
             docker compose -f compose-prod.yaml pull
