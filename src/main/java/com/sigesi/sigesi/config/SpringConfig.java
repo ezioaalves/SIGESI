@@ -33,7 +33,11 @@ public class SpringConfig {
             .anyRequest().authenticated())
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService))
-            .successHandler(successHandler));
+            .successHandler(successHandler)
+            .failureHandler((request, response, exception) -> {
+              response.sendRedirect(
+                  "http://localhost:3000/?authError=usuario_inativo");
+            }));
 
     return http.build();
   }
