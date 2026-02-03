@@ -27,6 +27,7 @@ services:
 
   app:
     image: marcosqf/sigesi-backend:latest
+    container_name: sigesi-backend
     depends_on:
       db:
         condition: service_healthy
