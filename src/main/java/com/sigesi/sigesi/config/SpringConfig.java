@@ -19,7 +19,7 @@ public class SpringConfig {
   private CustomOidcUserService customOidcUserService;
 
   @Value("${app.oauth2.failure-redirect}")
-  private String failureRedirect;
+  private String failureRedirectUrl;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,7 +39,7 @@ public class SpringConfig {
             .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService))
             .successHandler(successHandler)
             .failureHandler((request, response, exception) -> {
-              response.sendRedirect(failureRedirect);
+              response.sendRedirect(failureRedirectUrl);
             }));
 
     return http.build();
