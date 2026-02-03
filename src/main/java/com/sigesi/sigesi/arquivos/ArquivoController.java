@@ -72,7 +72,6 @@ public class ArquivoController {
    */
   @GetMapping("/{id}/download")
   public ResponseEntity<org.springframework.core.io.Resource> downloadFile(@PathVariable Long id) {
-    System.out.println("Processing download request for file ID: " + id);
     ArquivoResponseDTO metadata = arquivoService.getFileMetadata(id);
     java.io.InputStream inputStream = arquivoService.downloadFile(id);
 

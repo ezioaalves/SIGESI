@@ -2,9 +2,9 @@ name: Build, Push and Deploy
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   build-and-push:
@@ -33,33 +33,55 @@ jobs:
         id: set-image
         run: echo "::set-output name=image::${{ secrets.DOCKERHUB_USERNAME }}/sigesi-backend:latest"
 
-deploy:
-  needs: build-and-push
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Copy compose-prod.yaml to VPS
-      uses: appleboy/scp-action@v0.1.5
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: 22
-        source: "compose-prod.yaml"
-        target: "~/marcelo/sigesi/"
+      - name: Copy compose-prod.yaml to VPS
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "compose-prod.yaml"
+          target: "~/pipeline/sigesi"
 
-    - name: Deploy on VPS
-      uses: appleboy/ssh-action@v0.1.5
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: 22
-        debug: true
-        script: |
-          cd ~/sigesi
-          docker compose -f compose-prod.yaml pull
-          docker compose -f compose-prod.yaml up -d
-          docker compose -f compose-prod.yaml ps
+      - name: Copy nginx.conf to VPS
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "nginx.conf"
+          target: "~/pipeline/sigesi"
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          debug: true
+          script: |
+
+            cd ~/pipeline/sigesi
+
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" > ~/pipeline/sigesi/.env
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> ~/pipeline/sigesi/.env
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> ~/pipeline/sigesi/.env
+            echo "DATABASE_URL=jdbc:postgresql://db:5432/${{ secrets.DATABASE_NAME }}" >> ~/pipeline/sigesi/.env
+            echo "MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}" >> ~/pipeline/sigesi/.env
+            echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> ~/pipeline/sigesi/.env
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> ~/pipeline/sigesi/.env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ~/pipeline/sigesi/.env
+            echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> ~/pipeline/sigesi/.env
+
+            docker compose -f compose-prod.yaml pull
+            docker compose -f compose-prod.yaml up -d
+            docker compose -f compose-prod.yaml ps
