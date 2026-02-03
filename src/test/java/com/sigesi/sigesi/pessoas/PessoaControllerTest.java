@@ -75,7 +75,8 @@ class PessoaControllerTest {
   void testListAllRetorna200ComPessoas() throws Exception {
     var p1 = pessoaDTO(1L, "João Silva", "123.456.789-00", SexoEnum.MASCULINO);
     var p2 = pessoaDTO(2L, "Maria Santos", "987.654.321-00", SexoEnum.FEMININO);
-    given(pessoaService.getAll()).willReturn(List.of(p1, p2));
+    given(pessoaService.getAllFiltered(null, null, null, null))
+        .willReturn(List.of(p1, p2));
 
     mockMvc.perform(get("/api/pessoas/").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
