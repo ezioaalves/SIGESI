@@ -12,9 +12,9 @@ public interface DocumentoRepository extends JpaRepository<Documento, Long> {
 
   List<Documento> findAllByOrderByIdAsc();
 
-  List<Documento> findByAssinanteIdOrderByDataDesc(Long assinanteId);
+  List<Documento> findByAssinanteOrderByDataDesc(String assinante);
 
-  List<Documento> findByInteressadoIdOrderByDataDesc(Long interessadoId);
+  List<Documento> findByInteressadoOrderByDataDesc(String interessado);
 
   List<Documento> findByTipo(DocumentoTipo tipo);
 }
