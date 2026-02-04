@@ -31,6 +31,7 @@ public class SpringConfig {
             .requestMatchers("/api/cemiterios/**").hasAnyRole("OPERADOR", "ADMIN")
             .requestMatchers("/api/jazigos/**").hasAnyRole("OPERADOR", "ADMIN")
             .requestMatchers("/api/gavetas/**").hasAnyRole("OPERADOR", "ADMIN")
+            .requestMatchers("/api/documentos/**").hasAnyRole("OPERADOR", "ADMIN")
             .requestMatchers("/api/enderecos/**").hasAnyRole("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
             .requestMatchers("/api/usuarios/me").authenticated()
             .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
