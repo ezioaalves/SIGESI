@@ -82,6 +82,8 @@ jobs:
             echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> ~/pipeline/sigesi/.env
             echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ~/pipeline/sigesi/.env
             echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> ~/pipeline/sigesi/.env
+            echo "APP_OAUTH2_SUCCESS_REDIRECT=http://ezioalves.space/portal" >> ~/pipeline/sigesi/.env
+            echo "APP_OAUTH2_FAILURE_REDIRECT=http://ezioalves.space/?authError=usuario_inativo" >> ~/pipeline/sigesi/.env
 
             docker compose -f compose-prod.yaml pull
             docker compose -f compose-prod.yaml up -d

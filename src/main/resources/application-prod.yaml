@@ -1,5 +1,0 @@
-app:
-  oauth2:
-    success-redirect: http://ezioalves.space/portal
-    failure-redirect: http://ezioalves.space/?authError=usuario_inativo
-
