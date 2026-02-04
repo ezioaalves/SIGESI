@@ -3,7 +3,7 @@ package com.sigesi.sigesi.config;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -18,13 +18,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
   private final UsuarioService usuarioService;
-  private final String successRedirect;
+
+  @Value("${app.oauth2.success-redirect}")
+  private String successRedirect;
 
   @Autowired
-  public OAuth2LoginSuccessHandler(UsuarioService usuarioService, Environment env) {
+  public OAuth2LoginSuccessHandler(UsuarioService usuarioService) {
     this.usuarioService = usuarioService;
-    this.successRedirect = env.getProperty(
-        "app.oauth2.success-redirect");
   }
 
   @Override
