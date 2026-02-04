@@ -6,8 +6,6 @@ import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.documentos.dtos.DocumentoCreateDTO;
 import com.sigesi.sigesi.documentos.dtos.DocumentoResponseDTO;
 import com.sigesi.sigesi.documentos.dtos.DocumentoUpdateDTO;
-import com.sigesi.sigesi.pessoas.Pessoa;
-import com.sigesi.sigesi.pessoas.PessoaService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +24,6 @@ public class DocumentoService {
   private DocumentoMapper documentoMapper;
 
   @Autowired
-  private PessoaService pessoaService;
-
-  @Autowired
   private ArquivoService arquivoService;
 
   public List<DocumentoResponseDTO> getAll() {
@@ -44,12 +39,7 @@ public class DocumentoService {
   }
 
   public DocumentoResponseDTO createDocumento(DocumentoCreateDTO dto) {
-    Pessoa assinante = pessoaService.getPessoEntityById(dto.getAssinanteId());
-    Pessoa interessado = pessoaService.getPessoEntityById(dto.getInteressadoId());
-
     Documento entity = documentoMapper.toEntity(dto);
-    entity.setAssinante(assinante);
-    entity.setInteressado(interessado);
 
     this.resolveAnexos(dto.getAnexoIds(), entity);
 
@@ -61,16 +51,6 @@ public class DocumentoService {
     Documento documento = this.getDocumentoEntityById(id);
 
     documentoMapper.updateFromDto(dto, documento);
-
-    if (dto.getAssinanteId() != null) {
-      Pessoa assinante = pessoaService.getPessoEntityById(dto.getAssinanteId());
-      documento.setAssinante(assinante);
-    }
-
-    if (dto.getInteressadoId() != null) {
-      Pessoa interessado = pessoaService.getPessoEntityById(dto.getInteressadoId());
-      documento.setInteressado(interessado);
-    }
 
     this.resolveAnexos(dto.getAnexoIds(), documento);
 

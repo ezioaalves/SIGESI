@@ -30,11 +30,11 @@ public class DocumentoCreateDTO {
 
   private String portaria;
 
-  @NotNull(message = "Assinante e obrigatorio")
-  private Long assinanteId;
+  @NotBlank(message = "Assinante e obrigatorio")
+  private String assinante;
 
-  @NotNull(message = "Interessado e obrigatorio")
-  private Long interessadoId;
+  @NotBlank(message = "Interessado e obrigatorio")
+  private String interessado;
 
   private String destino;
 
