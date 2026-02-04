@@ -7,8 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
 import com.sigesi.sigesi.authentication.CustomOidcUserService;
 
@@ -22,7 +21,7 @@ public class SpringConfig {
   private CustomOidcUserService customOidcUserService;
 
   @Value("${app.oauth2.failure-redirect}")
-  private String failureRedirectUrl;
+  private String failureRedirect;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,16 +38,18 @@ public class SpringConfig {
             .requestMatchers("/api/usuarios/me").authenticated()
             .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
             .anyRequest().authenticated())
-        .exceptionHandling(exceptions -> exceptions
-            .defaultAuthenticationEntryPointFor(
-                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                new AntPathRequestMatcher("/api/**")
-            ))
+        .logout(logout -> logout
+            .logoutUrl("/api/auth/logout")
+            .invalidateHttpSession(true)
+            .clearAuthentication(true)
+            .deleteCookies("JSESSIONID")
+            .logoutSuccessHandler(
+                new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)))
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService))
             .successHandler(successHandler)
             .failureHandler((request, response, exception) -> {
-              response.sendRedirect(failureRedirectUrl);
+              response.sendRedirect(failureRedirect);
             }));
 
     return http.build();
