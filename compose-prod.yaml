@@ -6,8 +6,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - app
+    restart: always
 
   db:
     image: postgres:17
@@ -24,27 +23,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
 
-  app:
+  sigesi-backend:
     image: marcosqf/sigesi-backend:latest
     container_name: sigesi-backend
     depends_on:
       db:
         condition: service_healthy
-    # ports:
-    #   - "8080:8080"
-    #   - "80:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      - SPRING_PROFILES_ACTIVE=prod
     env_file:
       - .env
+    expose:
+      - "8080"
     restart: always
 
-  frontend:
+  sigesi-frontend:
     image: marcosqf/sigesi-frontend:latest
     container_name: sigesi-frontend
-    depends_on:
-      app
+    expose:
+      - "80"
     restart: always
 
   minio:
@@ -65,3 +64,4 @@ services:
 volumes:
   sigesi_data:
   minio_data:
+
