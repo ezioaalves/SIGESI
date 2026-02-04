@@ -55,8 +55,8 @@ class DocumentoControllerTest {
     dto.setSubject(subject);
     dto.setBody(body);
     dto.setTipo(DocumentoTipo.OFICIO);
-    dto.setAssinanteId(1L);
-    dto.setInteressadoId(2L);
+    dto.setAssinante("João Silva");
+    dto.setInteressado("Maria Santos");
     return dto;
   }
 
@@ -131,8 +131,8 @@ class DocumentoControllerTest {
     DocumentoCreateDTO invalidDTO = new DocumentoCreateDTO();
     invalidDTO.setSubject("");
     invalidDTO.setBody("Body");
-    invalidDTO.setAssinanteId(1L);
-    invalidDTO.setInteressadoId(2L);
+    invalidDTO.setAssinante("João Silva");
+    invalidDTO.setInteressado("Maria Santos");
 
     mockMvc.perform(post("/api/documentos/")
         .contentType(MediaType.APPLICATION_JSON)

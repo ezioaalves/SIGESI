@@ -27,9 +27,9 @@ public class DocumentoUpdateDTO {
 
   private String portaria;
 
-  private Long assinanteId;
+  private String assinante;
 
-  private Long interessadoId;
+  private String interessado;
 
   private String destino;
 

@@ -2,7 +2,6 @@ package com.sigesi.sigesi.documentos.dtos;
 
 import com.sigesi.sigesi.arquivos.dtos.ArquivoResponseDTO;
 import com.sigesi.sigesi.documentos.DocumentoTipo;
-import com.sigesi.sigesi.pessoas.Pessoa;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,9 +33,9 @@ public class DocumentoResponseDTO {
 
   private String portaria;
 
-  private Pessoa assinante;
+  private String assinante;
 
-  private Pessoa interessado;
+  private String interessado;
 
   private String destino;
 

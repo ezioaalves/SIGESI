@@ -2,7 +2,6 @@ package com.sigesi.sigesi.documentos;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.sigesi.sigesi.pessoas.Pessoa;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -32,8 +31,8 @@ class DocumentoEntityTest {
     Documento documento = Documento.builder()
         .subject(null)
         .body("Corpo do documento")
-        .assinante(Pessoa.builder().id(1L).build())
-        .interessado(Pessoa.builder().id(2L).build())
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
 
     Set<ConstraintViolation<Documento>> violations = validator.validate(documento);
@@ -50,8 +49,8 @@ class DocumentoEntityTest {
     Documento documento = Documento.builder()
         .subject("")
         .body("Corpo do documento")
-        .assinante(Pessoa.builder().id(1L).build())
-        .interessado(Pessoa.builder().id(2L).build())
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
 
     Set<ConstraintViolation<Documento>> violations = validator.validate(documento);
@@ -68,8 +67,8 @@ class DocumentoEntityTest {
     Documento documento = Documento.builder()
         .subject("   ")
         .body("Corpo do documento")
-        .assinante(Pessoa.builder().id(1L).build())
-        .interessado(Pessoa.builder().id(2L).build())
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
 
     Set<ConstraintViolation<Documento>> violations = validator.validate(documento);
@@ -86,8 +85,8 @@ class DocumentoEntityTest {
     Documento documento = Documento.builder()
         .subject("Assunto do documento")
         .body(null)
-        .assinante(Pessoa.builder().id(1L).build())
-        .interessado(Pessoa.builder().id(2L).build())
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
 
     Set<ConstraintViolation<Documento>> violations = validator.validate(documento);
@@ -104,8 +103,8 @@ class DocumentoEntityTest {
     Documento documento = Documento.builder()
         .subject("Assunto do documento")
         .body("")
-        .assinante(Pessoa.builder().id(1L).build())
-        .interessado(Pessoa.builder().id(2L).build())
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
 
     Set<ConstraintViolation<Documento>> violations = validator.validate(documento);
@@ -123,7 +122,7 @@ class DocumentoEntityTest {
         .subject("Assunto do documento")
         .body("Corpo do documento")
         .assinante(null)
-        .interessado(Pessoa.builder().id(2L).build())
+        .interessado("Maria Santos")
         .build();
 
     Set<ConstraintViolation<Documento>> violations = validator.validate(documento);
@@ -140,7 +139,7 @@ class DocumentoEntityTest {
     Documento documento = Documento.builder()
         .subject("Assunto do documento")
         .body("Corpo do documento")
-        .assinante(Pessoa.builder().id(1L).build())
+        .assinante("João Silva")
         .interessado(null)
         .build();
 
@@ -162,8 +161,8 @@ class DocumentoEntityTest {
         .body("Corpo do documento")
         .tipo(DocumentoTipo.OFICIO)
         .portaria("Portaria 123/2026")
-        .assinante(Pessoa.builder().id(1L).build())
-        .interessado(Pessoa.builder().id(2L).build())
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .destino("Secretaria Municipal")
         .build();
 
@@ -178,8 +177,8 @@ class DocumentoEntityTest {
     Documento documento = Documento.builder()
         .subject("Test Subject")
         .body("Test Body")
-        .assinante(Pessoa.builder().id(1L).build())
-        .interessado(Pessoa.builder().id(2L).build())
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
 
     assertNotNull(documento);
