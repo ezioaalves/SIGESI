@@ -25,15 +25,12 @@ services:
       retries: 5
     restart: always
 
-  app:
+  sigesi-backend:
     image: marcosqf/sigesi-backend:latest
     container_name: sigesi-backend
     depends_on:
       db:
         condition: service_healthy
-    # ports:
-    #   - "8080:8080"
-    #   - "80:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     env_file:
