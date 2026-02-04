@@ -1,16 +1,17 @@
 name: Build, Push and Deploy
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-  workflow_dispatch:
   workflow_call:
     inputs:
       example_input:
         required: false
         type: string
+
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
