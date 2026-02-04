@@ -1,7 +1,6 @@
 package com.sigesi.sigesi.documentos;
 
 import com.sigesi.sigesi.arquivos.Arquivo;
-import com.sigesi.sigesi.pessoas.Pessoa;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,11 +8,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,15 +51,13 @@ public class Documento {
 
   private String portaria;
 
-  @NotNull(message = "Assinante e obrigatorio")
-  @ManyToOne
-  @JoinColumn(name = "assinante_id", nullable = false)
-  private Pessoa assinante;
+  @NotBlank(message = "Assinante e obrigatorio")
+  @Column(nullable = false)
+  private String assinante;
 
-  @NotNull(message = "Interessado e obrigatorio")
-  @ManyToOne
-  @JoinColumn(name = "interessado_id", nullable = false)
-  private Pessoa interessado;
+  @NotBlank(message = "Interessado e obrigatorio")
+  @Column(nullable = false)
+  private String interessado;
 
   private String destino;
 

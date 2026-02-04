@@ -4,14 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.sigesi.sigesi.arquivos.Arquivo;
 import com.sigesi.sigesi.arquivos.ArquivoService;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.documentos.dtos.DocumentoCreateDTO;
 import com.sigesi.sigesi.documentos.dtos.DocumentoResponseDTO;
 import com.sigesi.sigesi.documentos.dtos.DocumentoUpdateDTO;
-import com.sigesi.sigesi.pessoas.Pessoa;
-import com.sigesi.sigesi.pessoas.PessoaService;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -37,9 +34,6 @@ class DocumentoServiceTest {
   private DocumentoMapper documentoMapper;
 
   @Mock
-  private PessoaService pessoaService;
-
-  @Mock
   private ArquivoService arquivoService;
 
   @InjectMocks
@@ -48,28 +42,23 @@ class DocumentoServiceTest {
   private DocumentoCreateDTO documentoCreateDTO;
   private DocumentoResponseDTO documentoResponseDTO;
   private Documento documento;
-  private Pessoa assinante;
-  private Pessoa interessado;
 
   @BeforeEach
   void setUp() {
-    assinante = Pessoa.builder().id(1L).nome("Assinante").build();
-    interessado = Pessoa.builder().id(2L).nome("Interessado").build();
-
     documentoCreateDTO = new DocumentoCreateDTO();
     documentoCreateDTO.setSubject("Test Subject");
     documentoCreateDTO.setBody("Test Body");
     documentoCreateDTO.setTipo(DocumentoTipo.OFICIO);
-    documentoCreateDTO.setAssinanteId(1L);
-    documentoCreateDTO.setInteressadoId(2L);
+    documentoCreateDTO.setAssinante("João Silva");
+    documentoCreateDTO.setInteressado("Maria Santos");
 
     documento = Documento.builder()
         .id(1L)
         .subject("Test Subject")
         .body("Test Body")
         .tipo(DocumentoTipo.OFICIO)
-        .assinante(assinante)
-        .interessado(interessado)
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
 
     documentoResponseDTO = DocumentoResponseDTO.builder()
@@ -77,6 +66,8 @@ class DocumentoServiceTest {
         .subject("Test Subject")
         .body("Test Body")
         .tipo(DocumentoTipo.OFICIO)
+        .assinante("João Silva")
+        .interessado("Maria Santos")
         .build();
   }
 
@@ -135,8 +126,6 @@ class DocumentoServiceTest {
   @Test
   @DisplayName("Deve criar documento com sucesso")
   void testCreateDocumentoComSucesso() {
-    when(pessoaService.getPessoEntityById(1L)).thenReturn(assinante);
-    when(pessoaService.getPessoEntityById(2L)).thenReturn(interessado);
     when(documentoMapper.toEntity(documentoCreateDTO)).thenReturn(documento);
     when(documentoRepository.save(any(Documento.class))).thenReturn(documento);
     when(documentoMapper.toDto(documento)).thenReturn(documentoResponseDTO);
@@ -144,8 +133,6 @@ class DocumentoServiceTest {
     DocumentoResponseDTO resultado = documentoService.createDocumento(documentoCreateDTO);
 
     assertNotNull(resultado);
-    verify(pessoaService, times(1)).getPessoEntityById(1L);
-    verify(pessoaService, times(1)).getPessoEntityById(2L);
     verify(documentoRepository, times(1)).save(any(Documento.class));
   }
 
