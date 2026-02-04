@@ -24,8 +24,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
   public OAuth2LoginSuccessHandler(UsuarioService usuarioService, Environment env) {
     this.usuarioService = usuarioService;
     this.successRedirect = env.getProperty(
-        "app.oauth2.success-redirect",
-        "http://localhost:3000/portal");
+        "app.oauth2.success-redirect");
   }
 
   @Override
