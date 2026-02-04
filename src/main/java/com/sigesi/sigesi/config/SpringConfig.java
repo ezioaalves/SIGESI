@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
 import com.sigesi.sigesi.authentication.CustomOidcUserService;
 
@@ -36,6 +38,13 @@ public class SpringConfig {
             .requestMatchers("/api/usuarios/me").authenticated()
             .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
             .anyRequest().authenticated())
+        .logout(logout -> logout
+            .logoutUrl("/api/auth/logout")
+            .invalidateHttpSession(true)
+            .clearAuthentication(true)
+            .deleteCookies("JSESSIONID")
+            .logoutSuccessHandler(
+                new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)))
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService))
             .successHandler(successHandler)
