@@ -1,12 +1,6 @@
 name: Build, Push and Deploy
 
 on:
-  workflow_call:
-    inputs:
-      example_input:
-        required: false
-        type: string
-
   push:
     branches: [ main, develop ]
   pull_request:
