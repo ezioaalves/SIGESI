@@ -17,8 +17,9 @@ public interface GavetaMapper {
   @Mapping(target = "ocupante", ignore = true)
   Gaveta toEntity(GavetaCreateDTO dto);
 
-  @Mapping(target = "jazigo", ignore = true)
-  @Mapping(target = "ocupante", ignore = true)
+  @Mapping(target = "jazigo", source = "jazigo")
+  @Mapping(target = "ocupante", source = "ocupante")
+  @Mapping(target = "numero", source = "numero")
   GavetaResponseDTO toDto(Gaveta entity);
 
   @Mapping(target = "id", ignore = true)

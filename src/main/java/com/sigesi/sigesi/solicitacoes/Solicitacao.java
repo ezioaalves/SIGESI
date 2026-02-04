@@ -46,9 +46,13 @@ public class Solicitacao {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String body;
 
-  @ManyToOne
-  @JoinColumn(name = "anexo_id")
-  private Arquivo anexo;
+  @jakarta.persistence.ManyToMany
+// @formatter:off
+  @jakarta.persistence.JoinTable(name = "solicitacao_arquivos",
+    joinColumns = @jakarta.persistence.JoinColumn(name = "solicitacao_id"),
+    inverseJoinColumns = @jakarta.persistence.JoinColumn(name = "arquivo_id"))
+// @formatter:on
+  private java.util.List<Arquivo> anexos;
 
   @NotNull(message = "Autor é obrigatório")
   @ManyToOne

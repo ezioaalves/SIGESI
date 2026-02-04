@@ -34,8 +34,12 @@ public class PessoaController {
   private PessoaService pessoaService;
 
   @GetMapping("/")
-  public ResponseEntity<List<PessoaResponseDTO>> listAll() {
-    List<PessoaResponseDTO> pessoas = pessoaService.getAll();
+  public ResponseEntity<List<PessoaResponseDTO>> listAll(
+      @RequestParam(required = false) String nome,
+      @RequestParam(required = false) String cpf,
+      @RequestParam(required = false) SexoEnum sexo,
+      @RequestParam(required = false) Long enderecoId) {
+    List<PessoaResponseDTO> pessoas = pessoaService.getAllFiltered(nome, cpf, sexo, enderecoId);
     return ResponseEntity.ok(pessoas);
   }
 

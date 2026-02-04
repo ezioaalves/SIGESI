@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,30 +44,33 @@ class UsuarioServiceTest {
   }
 
   @Test
-  @DisplayName("Deve retornar lista vazia quando não há usuários")
+  @DisplayName("Deve retornar lista vazia quando não há usuários (exceto root)")
   void testGetAllRetornaListaVazia() {
-    when(usuarioRepository.findAll()).thenReturn(List.of());
+    when(usuarioRepository.findByIdNot(1L)).thenReturn(List.of());
 
     List<Usuario> resultado = usuarioService.getAll();
 
     assertNotNull(resultado);
     assertTrue(resultado.isEmpty());
-    verify(usuarioRepository, times(1)).findAll();
+
+    verify(usuarioRepository, times(1)).findByIdNot(1L);
   }
 
   @Test
-  @DisplayName("Deve retornar lista com usuários existentes")
+  @DisplayName("Deve retornar lista com usuários existentes (exceto usuário root)")
   void testGetAllRetornaListaComUsuarios() {
     Usuario u1 = mock(Usuario.class);
     Usuario u2 = mock(Usuario.class);
     Usuario u3 = mock(Usuario.class);
 
-    when(usuarioRepository.findAll()).thenReturn(Arrays.asList(u1, u2, u3));
+    when(usuarioRepository.findByIdNot(1L))
+        .thenReturn(List.of(u1, u2, u3));
 
     List<Usuario> resultado = usuarioService.getAll();
 
     assertEquals(3, resultado.size());
-    verify(usuarioRepository, times(1)).findAll();
+    assertEquals(List.of(u1, u2, u3), resultado);
+    verify(usuarioRepository, times(1)).findByIdNot(1L);
   }
 
   @Test
@@ -99,10 +101,10 @@ class UsuarioServiceTest {
   @Test
   @DisplayName("Deve alternar status ativo de usuário ativo para inativo")
   void testToggleUsuarioAtivoDeAtivoParaInativo() {
-    when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioMock));
+    when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuarioMock));
     when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioMock);
 
-    Usuario resultado = usuarioService.toggleUsuarioAtivo(1L);
+    Usuario resultado = usuarioService.toggleUsuarioAtivo(2L);
 
     assertNotNull(resultado);
     verify(usuarioRepository, times(1)).save(usuarioMock);
@@ -112,10 +114,10 @@ class UsuarioServiceTest {
   @DisplayName("Deve alternar status ativo de usuário inativo para ativo")
   void testToggleUsuarioAtivoDeInativoParaAtivo() {
     usuarioMock.setAtivo(false);
-    when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioMock));
+    when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuarioMock));
     when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioMock);
 
-    Usuario resultado = usuarioService.toggleUsuarioAtivo(1L);
+    Usuario resultado = usuarioService.toggleUsuarioAtivo(2L);
 
     assertNotNull(resultado);
     verify(usuarioRepository, times(1)).save(usuarioMock);

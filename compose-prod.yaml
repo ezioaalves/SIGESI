@@ -1,0 +1,67 @@
+services:
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+
+  db:
+    image: postgres:17
+    env_file:
+      - .env
+    volumes:
+      - sigesi_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: marcosqf/sigesi-backend:latest
+    container_name: sigesi-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    # ports:
+    #   - "8080:8080"
+    #   - "80:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    env_file:
+      - .env
+    restart: always
+
+  frontend:
+    image: marcosqf/sigesi-frontend:latest
+    container_name: sigesi-frontend
+    depends_on:
+      app
+    restart: always
+
+  minio:
+    image: minio/minio:latest
+    container_name: sigesi-minio
+    env_file:
+      - .env
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: always
+
+volumes:
+  sigesi_data:
+  minio_data:

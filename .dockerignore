@@ -1,0 +1,26 @@
+# Ignorar arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar pastas de build locais
+target/
+build/
+
+# Ignorar testes
+
+src/test/
+
+# Ignorar configurações do IDE
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+
+# Ignorar logs
+*.log
+
+# Ignorar arquivos temporários
+*.tmp
+*.swp
+*.bak

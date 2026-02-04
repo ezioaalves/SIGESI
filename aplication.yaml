@@ -1,0 +1,4 @@
+app:
+  oauth2:
+    success-redirect: http://localhost:3000/portal
+    failure-redirect: http://localhost:3000/?authError=usuario_inativo

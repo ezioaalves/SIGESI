@@ -4,6 +4,7 @@ import com.sigesi.sigesi.usuarios.UsuarioService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -14,20 +15,24 @@ import java.io.IOException;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
   private final UsuarioService usuarioService;
+  private final String successRedirectUrl;
 
-  public OAuth2LoginSuccessHandler(UsuarioService usuarioService) {
+  public OAuth2LoginSuccessHandler(
+      UsuarioService usuarioService,
+      @Value("${app.oauth2.success-redirect}") String successRedirectUrl) {
     this.usuarioService = usuarioService;
+    this.successRedirectUrl = successRedirectUrl;
   }
 
   @Override
-  public void onAuthenticationSuccess(HttpServletRequest request,
+  public void onAuthenticationSuccess(
+      HttpServletRequest request,
       HttpServletResponse response,
-      Authentication authentication)
-      throws IOException, ServletException {
+      Authentication authentication) throws IOException, ServletException {
 
     usuarioService.processOAuthPostLogin(
         (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal());
 
-    response.sendRedirect("http://localhost:3000/portal");
+    response.sendRedirect(successRedirectUrl);
   }
 }

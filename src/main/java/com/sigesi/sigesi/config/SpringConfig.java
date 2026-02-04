@@ -1,6 +1,7 @@
 package com.sigesi.sigesi.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,6 +17,9 @@ public class SpringConfig {
 
   @Autowired
   private CustomOidcUserService customOidcUserService;
+
+  @Value("${app.oauth2.failure-redirect}")
+  private String failureRedirect;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,7 +37,10 @@ public class SpringConfig {
             .anyRequest().authenticated())
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService))
-            .successHandler(successHandler));
+            .successHandler(successHandler)
+            .failureHandler((request, response, exception) -> {
+              response.sendRedirect(failureRedirect);
+            }));
 
     return http.build();
   }

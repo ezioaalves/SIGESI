@@ -33,6 +33,13 @@ public class PessoaService {
         .collect(Collectors.toList());
   }
 
+  public List<PessoaResponseDTO> getAllFiltered(String nome, String cpf, SexoEnum sexo, Long enderecoId) {
+    return pessoaRepository.findAll(PessoaSpecifications.filter(nome, cpf, sexo, enderecoId))
+        .stream()
+        .map(pessoaMapper::toDto)
+        .toList();
+  }
+
   public PessoaResponseDTO getPessoaById(Long id) {
     Pessoa pessoa = pessoaRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Pessoa não encontrada com ID " + id));

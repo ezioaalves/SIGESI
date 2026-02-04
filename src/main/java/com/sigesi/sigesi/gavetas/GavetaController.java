@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sigesi.sigesi.gavetas.dtos.GavetaCreateDTO;
@@ -33,8 +34,11 @@ public class GavetaController {
   private GavetaService gavetaService;
 
   @GetMapping("/")
-  public ResponseEntity<List<GavetaResponseDTO>> listAll() {
-    List<GavetaResponseDTO> gavetas = gavetaService.getAll();
+  public ResponseEntity<List<GavetaResponseDTO>> listAll(
+      @RequestParam(required = false) Long jazigoId,
+      @RequestParam(required = false) Long ocupanteId) {
+
+    List<GavetaResponseDTO> gavetas = gavetaService.getAllFiltered(jazigoId, ocupanteId);
     return ResponseEntity.ok(gavetas);
   }
 
