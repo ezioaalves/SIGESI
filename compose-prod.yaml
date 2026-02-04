@@ -45,11 +45,11 @@ services:
       - "8080"
     restart: always
 
-  frontend:
+  sigesi-frontend:
     image: marcosqf/sigesi-frontend:latest
     container_name: sigesi-frontend
     expose:
-      - "3000"
+      - "80"
     restart: always
 
   minio:
