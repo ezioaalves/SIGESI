@@ -1,8 +1,6 @@
 package com.sigesi.sigesi.demandas;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.demandas.dtos.DemandaCreateDTO;
+import com.sigesi.sigesi.demandas.dtos.DemandaMaterialCreateDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaResponseDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaUpdateDTO;
 import com.sigesi.sigesi.materiais.Material;
@@ -99,10 +98,7 @@ public class DemandaService {
       demanda.setResponsavel(responsavel);
     }
 
-    if (dto.getMateriaisIds() != null && !dto.getMateriaisIds().isEmpty()) {
-      Set<Material> materiais = materialService.findAllByIds(dto.getMateriaisIds());
-      demanda.setMateriais(materiais);
-    }
+    resolveMateriais(dto.getMateriais(), demanda);
 
     Demanda saved = demandaRepository.save(demanda);
 
@@ -131,13 +127,9 @@ public class DemandaService {
       demanda.setResponsavel(responsavel);
     }
 
-    if (dto.getMateriaisIds() != null) {
-      if (dto.getMateriaisIds().isEmpty()) {
-        demanda.setMateriais(new HashSet<>());
-      } else {
-        Set<Material> materiais = materialService.findAllByIds(dto.getMateriaisIds());
-        demanda.setMateriais(materiais);
-      }
+    if (dto.getMateriais() != null) {
+      demanda.getMateriais().clear();
+      resolveMateriais(dto.getMateriais(), demanda);
     }
 
     Demanda updated = demandaRepository.save(demanda);
@@ -169,5 +161,23 @@ public class DemandaService {
   public Demanda getDemandaEntityById(Long id) {
     return demandaRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Demanda não encontrada com id " + id));
+  }
+
+  /**
+   * Resolve materiais do DTO e adiciona a demanda.
+   */
+  private void resolveMateriais(List<DemandaMaterialCreateDTO> items, Demanda demanda) {
+    if (items == null || items.isEmpty()) {
+      return;
+    }
+    for (DemandaMaterialCreateDTO item : items) {
+      Material material = materialService
+          .getMaterialEntityById(item.getMaterialId());
+      DemandaMaterial dm = DemandaMaterial.builder()
+          .material(material)
+          .quantidade(item.getQuantidade())
+          .build();
+      demanda.addDemandaMaterial(dm);
+    }
   }
 }
