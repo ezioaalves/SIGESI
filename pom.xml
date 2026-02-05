@@ -32,6 +32,7 @@
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <postgresql.version>42.7.7</postgresql.version>
+        <jacoco.version>0.8.14</jacoco.version>
     </properties>
     <dependencies>
         <dependency>
@@ -214,6 +215,74 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>com/sigesi/sigesi/SigesiApplication.class</exclude>
+                        <exclude>com/sigesi/sigesi/config/**</exclude>
+                        <exclude>com/sigesi/sigesi/authentication/**</exclude>
+                        <exclude>com/sigesi/sigesi/**/dtos/**</exclude>
+                        <exclude>com/sigesi/sigesi/**/*MapperImpl.class</exclude>
+                        <exclude>com/sigesi/sigesi/**/enums/**</exclude>
+                        <exclude>com/sigesi/sigesi/pessoas/SexoEnum.class</exclude>
+                        <exclude>com/sigesi/sigesi/solicitacoes/SolicitacaoAssunto.class</exclude>
+                        <exclude>com/sigesi/sigesi/solicitacoes/SolicitacaoStatus.class</exclude>
+                        <exclude>com/sigesi/sigesi/demandas/DemandaStatus.class</exclude>
+                        <exclude>com/sigesi/sigesi/documentos/DocumentoTipo.class</exclude>
+                        <exclude>com/sigesi/sigesi/storage/StorageException.class</exclude>
+                        <exclude>com/sigesi/sigesi/arquivos/validation/InvalidFileException.class</exclude>
+                        <exclude>com/sigesi/sigesi/config/ConflictException.class</exclude>
+                        <exclude>com/sigesi/sigesi/config/NotFoundException.class</exclude>
+                        <exclude>com/sigesi/sigesi/notifications/**</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <haltOnFailure>true</haltOnFailure>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.40</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.15</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
