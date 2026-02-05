@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.demandas.dtos.DemandaCreateDTO;
+import com.sigesi.sigesi.demandas.dtos.DemandaMaterialCreateDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaResponseDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaUpdateDTO;
 import com.sigesi.sigesi.usuarios.Usuario;
@@ -133,7 +133,9 @@ class DemandaControllerTest {
     createDto.setSolicitacaoId(1L);
     createDto.setResponsavelId(1L);
     createDto.setPrazo(LocalDate.of(2025, 12, 31));
-    createDto.setMateriaisIds(Set.of(1L, 2L));
+    DemandaMaterialCreateDTO item1 = new DemandaMaterialCreateDTO(1L, 5);
+    DemandaMaterialCreateDTO item2 = new DemandaMaterialCreateDTO(2L, 10);
+    createDto.setMateriais(List.of(item1, item2));
 
     DemandaResponseDTO responseDto = responseDto(1L, DemandaStatus.PENDENTE);
 

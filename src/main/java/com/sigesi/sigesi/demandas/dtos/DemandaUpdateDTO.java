@@ -1,7 +1,7 @@
 package com.sigesi.sigesi.demandas.dtos;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 import com.sigesi.sigesi.demandas.DemandaStatus;
 
@@ -27,6 +27,6 @@ public class DemandaUpdateDTO {
   @Schema(description = "Status da demanda", example = "EM_ANDAMENTO")
   private DemandaStatus status;
 
-  @Schema(description = "IDs dos materiais")
-  private Set<Long> materiaisIds;
+  @Schema(description = "Materiais com quantidade")
+  private List<DemandaMaterialCreateDTO> materiais;
 }
