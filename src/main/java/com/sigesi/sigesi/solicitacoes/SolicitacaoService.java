@@ -9,6 +9,7 @@ import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoUpdateDTO;
 import com.sigesi.sigesi.usuarios.Usuario;
 import com.sigesi.sigesi.usuarios.UsuarioService;
+import com.sigesi.sigesi.usuarios.enums.Role;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,18 @@ public class SolicitacaoService {
   @Autowired
   private ArquivoService arquivoService;
 
-  public List<SolicitacaoResponseDTO> getAll() {
-    return solicitacaoRepository.findAllByOrderByIdAsc()
-        .stream()
+  public List<SolicitacaoResponseDTO> getAll(Usuario usuario) {
+    List<Solicitacao> solicitacoes;
+
+    if (usuario.getRole() == Role.ADMIN
+        || usuario.getRole() == Role.OPERADOR) {
+      solicitacoes = solicitacaoRepository.findAllByOrderByIdAsc();
+    } else {
+      solicitacoes = solicitacaoRepository
+          .findByAutorIdOrderByDataDesc(usuario.getId());
+    }
+
+    return solicitacoes.stream()
         .map(solicitacaoMapper::toDto)
         .collect(Collectors.toList());
   }
