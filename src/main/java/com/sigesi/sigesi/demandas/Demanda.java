@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+
 import com.sigesi.sigesi.materiais.Material;
 import com.sigesi.sigesi.solicitacoes.Solicitacao;
 import com.sigesi.sigesi.usuarios.Usuario;
@@ -35,6 +37,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class Demanda {
 
   @Id
@@ -57,13 +60,16 @@ public class Demanda {
   @Column(name = "status", nullable = false)
   private DemandaStatus status;
 
+  // @formatter:off
   @Builder.Default
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   @JoinTable(
       name = "demanda_material",
       joinColumns = @JoinColumn(name = "demanda_id"),
       inverseJoinColumns = @JoinColumn(name = "material_id")
   )
+  // @formatter:on
+
   private Set<Material> materiais = new HashSet<>();
 
   /**
