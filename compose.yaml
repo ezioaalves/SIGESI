@@ -14,6 +14,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - sigesi-network
 
   app:
     build: .
@@ -22,8 +24,12 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    environment:
+      RABBITMQ_HOST: rabbitmq
     ports:
       - 8080:8080
+    networks:
+      - sigesi-network
 
   minio:
     image: minio/minio:latest
@@ -42,7 +48,13 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - sigesi-network
 
 volumes:
   sigesi_data:
   minio_data:
+
+networks:
+  sigesi-network:
+    name: sigesi-network

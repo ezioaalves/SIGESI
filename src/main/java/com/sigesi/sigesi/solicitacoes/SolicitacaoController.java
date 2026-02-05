@@ -1,5 +1,6 @@
 package com.sigesi.sigesi.solicitacoes;
 
+import com.sigesi.sigesi.authentication.CustomOAuth2User;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoUpdateDTO;
@@ -9,6 +10,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,8 +32,11 @@ public class SolicitacaoController {
   private SolicitacaoService solicitacaoService;
 
   @GetMapping("/")
-  public ResponseEntity<List<SolicitacaoResponseDTO>> listAll() {
-    List<SolicitacaoResponseDTO> solicitacoes = solicitacaoService.getAll();
+  public ResponseEntity<List<SolicitacaoResponseDTO>> listAll(
+      Authentication auth) {
+    CustomOAuth2User user = (CustomOAuth2User) auth.getPrincipal();
+    List<SolicitacaoResponseDTO> solicitacoes =
+        solicitacaoService.getAll(user.getUser());
     return ResponseEntity.ok(solicitacoes);
   }
 
