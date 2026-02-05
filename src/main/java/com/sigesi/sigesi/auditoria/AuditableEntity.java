@@ -9,7 +9,8 @@ public enum AuditableEntity {
   MATERIAL("com.sigesi.sigesi.materiais.Material"),
   SOLICITACAO("com.sigesi.sigesi.solicitacoes.Solicitacao"),
   USUARIO("com.sigesi.sigesi.usuarios.Usuario"),
-  DEMANDA("com.sigesi.sigesi.demandas.Demanda");
+  DEMANDA("com.sigesi.sigesi.demandas.Demanda"),
+  DOCUMENTO("com.sigesi.sigesi.documentos.Documento");
 
   private final String fullPath;
 
