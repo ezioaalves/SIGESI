@@ -1,5 +1,7 @@
 package com.sigesi.sigesi.usuarios;
 
+import org.hibernate.envers.Audited;
+
 import com.sigesi.sigesi.usuarios.enums.Role;
 
 import jakarta.persistence.Column;
@@ -19,6 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class Usuario {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
