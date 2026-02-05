@@ -10,7 +10,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import com.sigesi.sigesi.demandas.dtos.DemandaCreateDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaResponseDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaUpdateDTO;
-import com.sigesi.sigesi.materiais.MaterialMapper;
 import com.sigesi.sigesi.solicitacoes.SolicitacaoMapper;
 
 /**
@@ -18,7 +17,7 @@ import com.sigesi.sigesi.solicitacoes.SolicitacaoMapper;
  */
 @Mapper(componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-    uses = {SolicitacaoMapper.class, MaterialMapper.class})
+    uses = {SolicitacaoMapper.class, DemandaMaterialMapper.class})
 public interface DemandaMapper {
 
   @Mapping(target = "id", ignore = true)

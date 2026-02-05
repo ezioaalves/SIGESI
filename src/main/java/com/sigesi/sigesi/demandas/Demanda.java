@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.hibernate.envers.Audited;
 
-import com.sigesi.sigesi.materiais.Material;
 import com.sigesi.sigesi.solicitacoes.Solicitacao;
 import com.sigesi.sigesi.usuarios.Usuario;
 
@@ -19,9 +18,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -60,17 +58,11 @@ public class Demanda {
   @Column(name = "status", nullable = false)
   private DemandaStatus status;
 
-  // @formatter:off
   @Builder.Default
-  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinTable(
-      name = "demanda_material",
-      joinColumns = @JoinColumn(name = "demanda_id"),
-      inverseJoinColumns = @JoinColumn(name = "material_id")
-  )
-  // @formatter:on
-
-  private Set<Material> materiais = new HashSet<>();
+  @OneToMany(mappedBy = "demanda",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  private Set<DemandaMaterial> materiais = new HashSet<>();
 
   /**
    * Define status padrao antes de persistir.
@@ -83,16 +75,18 @@ public class Demanda {
   }
 
   /**
-   * Adiciona material a demanda.
+   * Adiciona DemandaMaterial a demanda.
    */
-  public void addMaterial(Material material) {
-    materiais.add(material);
+  public void addDemandaMaterial(DemandaMaterial item) {
+    materiais.add(item);
+    item.setDemanda(this);
   }
 
   /**
-   * Remove material da demanda.
+   * Remove DemandaMaterial da demanda.
    */
-  public void removeMaterial(Material material) {
-    materiais.remove(material);
+  public void removeDemandaMaterial(DemandaMaterial item) {
+    materiais.remove(item);
+    item.setDemanda(null);
   }
 }

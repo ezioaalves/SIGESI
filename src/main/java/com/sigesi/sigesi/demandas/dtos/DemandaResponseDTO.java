@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import com.sigesi.sigesi.demandas.DemandaStatus;
-import com.sigesi.sigesi.materiais.dtos.MaterialResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.usuarios.Usuario;
 
@@ -27,5 +26,5 @@ public class DemandaResponseDTO {
   private Usuario responsavel;
   private LocalDate prazo;
   private DemandaStatus status;
-  private Set<MaterialResponseDTO> materiais;
+  private Set<DemandaMaterialResponseDTO> materiais;
 }
