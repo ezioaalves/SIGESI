@@ -42,7 +42,6 @@ ENV/
 *.sqlite
 
 # Alembic
-alembic/versions/*.py
 !alembic/versions/__init__.py
 
 # Testing
