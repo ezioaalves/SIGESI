@@ -95,9 +95,9 @@ services:
       volumes:
         - rabbitmq_data:/var/lib/rabbitmq
       restart: unless-stopped
-      networks:
-        - default
-        - sigesi-network
+      # networks:
+      #   - default
+      #   - sigesi-network
 
 volumes:
   sigesi_data:
