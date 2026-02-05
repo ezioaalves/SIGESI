@@ -24,9 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * Testes para DocumentoController.
- */
 @WebMvcTest(controllers = DocumentoController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @DisplayName("DocumentoController Tests")
@@ -40,6 +37,9 @@ class DocumentoControllerTest {
 
   @MockitoBean
   private DocumentoService documentoService;
+
+  @MockitoBean
+  private DocumentoPdfService documentoPdfService;
 
   private DocumentoResponseDTO documentoDTO(Long id, String subject, String body) {
     return DocumentoResponseDTO.builder()
@@ -191,4 +191,5 @@ class DocumentoControllerTest {
     mockMvc.perform(delete("/api/documentos/{id}", 999L))
         .andExpect(status().isNotFound());
   }
+
 }
