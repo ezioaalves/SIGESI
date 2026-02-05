@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   notification-service:
     build: .
@@ -7,7 +5,7 @@ services:
     ports:
       - "8001:8000"
     environment:
-      - NOTIFICATION_DATABASE_URL=postgresql+asyncpg://notif_user:notif_pass@db:5432/notifications
+      - NOTIFICATION_DATABASE_URL=postgresql+asyncpg://notif_user:notif_pass@notification-db:5432/notifications
       - NOTIFICATION_RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - NOTIFICATION_RABBITMQ_QUEUE=sigesi_notifications
       - NOTIFICATION_RABBITMQ_EXCHANGE=sigesi_events
@@ -18,11 +16,14 @@ services:
       - NOTIFICATION_SMTP_FROM_EMAIL=${NOTIFICATION_SMTP_FROM_EMAIL:-noreply@sigesi.com}
       - NOTIFICATION_SMTP_FROM_NAME=${NOTIFICATION_SMTP_FROM_NAME:-SIGESI Notificações}
     depends_on:
-      - db
+      - notification-db
       - rabbitmq
     restart: unless-stopped
+    networks:
+      - default
+      - sigesi-network
 
-  db:
+  notification-db:
     image: postgres:16-alpine
     container_name: sigesi-notification-db
     environment:
@@ -47,7 +48,14 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
+    networks:
+      - default
+      - sigesi-network
 
 volumes:
   notification_db_data:
   rabbitmq_data:
+
+networks:
+  sigesi-network:
+    external: true
