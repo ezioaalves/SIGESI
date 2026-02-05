@@ -1,5 +1,7 @@
 package com.sigesi.sigesi.enderecos;
 
+import org.hibernate.envers.Audited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class Endereco {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
