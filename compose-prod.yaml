@@ -61,7 +61,50 @@ services:
       retries: 3
     restart: always
 
+  notification-service:
+    image: marcosqf/sigesi-notifiction-service:latest
+    container_name: notification-service
+    restart: always
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env2
+
+  notification-db:
+    image: postgres:16-alpine
+    container_name: sigesi-notification-db
+    environment:
+      - POSTGRES_USER=notif_user
+      - POSTGRES_PASSWORD=notif_pass
+      - POSTGRES_DB=notifications
+    ports:
+      - "5433:5432"
+    volumes:
+      - notification_db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  rabbitmq:
+      image: rabbitmq:3-management-alpine
+      container_name: sigesi-rabbitmq
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+      environment:
+        - RABBITMQ_DEFAULT_USER=guest
+        - RABBITMQ_DEFAULT_PASS=guest
+      volumes:
+        - rabbitmq_data:/var/lib/rabbitmq
+      restart: unless-stopped
+      # networks:
+      #   - default
+      #   - sigesi-network
+
 volumes:
   sigesi_data:
   minio_data:
+  notification_db_data:
+  rabbitmq_data:
 
+networks:
+  default:
+    external: true
