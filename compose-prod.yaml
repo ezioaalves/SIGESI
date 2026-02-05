@@ -104,7 +104,3 @@ volumes:
   minio_data:
   notification_db_data:
   rabbitmq_data:
-
-networks:
-  default:
-    external: true
