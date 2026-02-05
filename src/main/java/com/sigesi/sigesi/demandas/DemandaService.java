@@ -15,6 +15,7 @@ import com.sigesi.sigesi.demandas.dtos.DemandaResponseDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaUpdateDTO;
 import com.sigesi.sigesi.materiais.Material;
 import com.sigesi.sigesi.materiais.MaterialService;
+import com.sigesi.sigesi.notifications.NotificationPublisher;
 import com.sigesi.sigesi.solicitacoes.Solicitacao;
 import com.sigesi.sigesi.solicitacoes.SolicitacaoService;
 import com.sigesi.sigesi.usuarios.Usuario;
@@ -40,6 +41,9 @@ public class DemandaService {
 
   @Autowired
   private MaterialService materialService;
+
+  @Autowired
+  private NotificationPublisher notificationPublisher;
 
   /**
    * Lista todas as demandas.
@@ -101,6 +105,12 @@ public class DemandaService {
     }
 
     Demanda saved = demandaRepository.save(demanda);
+
+    // Publish notification event if demand was assigned to a user
+    if (saved.getResponsavel() != null) {
+      notificationPublisher.publishDemandAssigned(saved);
+    }
+
     return demandaMapper.toDto(saved);
   }
 
@@ -110,6 +120,9 @@ public class DemandaService {
   @Transactional
   public DemandaResponseDTO updateDemanda(Long id, DemandaUpdateDTO dto) {
     Demanda demanda = this.getDemandaEntityById(id);
+
+    // Store old status for notification
+    DemandaStatus oldStatus = demanda.getStatus();
 
     demandaMapper.updateFromDto(dto, demanda);
 
@@ -128,6 +141,17 @@ public class DemandaService {
     }
 
     Demanda updated = demandaRepository.save(demanda);
+
+    // Publish notification event if status changed
+    if (oldStatus != updated.getStatus() && updated.getResponsavel() != null) {
+      notificationPublisher.publishDemandStatusChanged(updated, oldStatus);
+    }
+
+    // Publish notification event if demand was assigned to a new user
+    if (dto.getResponsavelId() != null && updated.getResponsavel() != null) {
+      notificationPublisher.publishDemandAssigned(updated);
+    }
+
     return demandaMapper.toDto(updated);
   }
 
