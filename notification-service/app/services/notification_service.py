@@ -59,7 +59,7 @@ class NotificationService:
                         "message": f"Você recebeu uma nova demanda relacionada a {event.assunto}",
                         "entity_type": "DEMANDA",
                         "entity_id": event.demand_id,
-                        "event_metadata": event.model_dump(),
+                        "event_metadata": event.model_dump(mode="json"),
                     },
                 )
 
@@ -116,7 +116,7 @@ class NotificationService:
                         "message": f"Status mudou de {event.old_status} para {event.new_status}",
                         "entity_type": "DEMANDA",
                         "entity_id": event.demand_id,
-                        "event_metadata": event.model_dump(),
+                        "event_metadata": event.model_dump(mode="json"),
                     },
                 )
 

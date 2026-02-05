@@ -23,46 +23,55 @@ class RabbitMQConsumer:
         self.channel = None
 
     async def start_consuming(self):
-        """Start consuming messages from RabbitMQ."""
-        try:
-            # Connect with automatic reconnection
-            self.connection = await connect_robust(settings.rabbitmq_url)
-            self.channel = await self.connection.channel()
+        """Start consuming messages from RabbitMQ with retry on initial connection failure."""
+        retry_delay = 5
+        max_retry_delay = 30
 
-            # Set QoS - process 10 messages at a time
-            await self.channel.set_qos(prefetch_count=10)
+        while True:
+            try:
+                # Connect with automatic reconnection
+                self.connection = await connect_robust(settings.rabbitmq_url)
+                self.channel = await self.connection.channel()
 
-            # Declare exchange (topic type for routing keys)
-            exchange = await self.channel.declare_exchange(
-                settings.rabbitmq_exchange, type="topic", durable=True
-            )
+                # Set QoS - process 10 messages at a time
+                await self.channel.set_qos(prefetch_count=10)
 
-            # Declare queue
-            queue = await self.channel.declare_queue(
-                settings.rabbitmq_queue, durable=True
-            )
+                # Declare exchange (topic type for routing keys)
+                exchange = await self.channel.declare_exchange(
+                    settings.rabbitmq_exchange, type="topic", durable=True
+                )
 
-            # Bind queue to exchange with routing keys
-            await queue.bind(exchange, routing_key="demand.assigned")
-            await queue.bind(exchange, routing_key="demand.status_changed")
+                # Declare queue
+                queue = await self.channel.declare_queue(
+                    settings.rabbitmq_queue, durable=True
+                )
 
-            logger.info(
-                f"Started consuming from queue '{settings.rabbitmq_queue}' "
-                f"on exchange '{settings.rabbitmq_exchange}'"
-            )
+                # Bind queue to exchange with routing keys
+                await queue.bind(exchange, routing_key="demand.assigned")
+                await queue.bind(exchange, routing_key="demand.status_changed")
 
-            # Start consuming messages
-            await queue.consume(self.process_message)
+                logger.info(
+                    f"Started consuming from queue '{settings.rabbitmq_queue}' "
+                    f"on exchange '{settings.rabbitmq_exchange}'"
+                )
 
-            # Keep consumer running
-            await asyncio.Future()
+                # Start consuming messages
+                await queue.consume(self.process_message)
 
-        except asyncio.CancelledError:
-            logger.info("Consumer cancelled, shutting down...")
-            await self.stop_consuming()
-        except Exception as e:
-            logger.error(f"Error in consumer: {str(e)}")
-            raise
+                # Keep consumer running
+                await asyncio.Future()
+
+            except asyncio.CancelledError:
+                logger.info("Consumer cancelled, shutting down...")
+                await self.stop_consuming()
+                return
+            except Exception as e:
+                logger.error(
+                    f"Error in consumer: {str(e)}. "
+                    f"Retrying in {retry_delay}s..."
+                )
+                await asyncio.sleep(retry_delay)
+                retry_delay = min(retry_delay * 2, max_retry_delay)
 
     async def stop_consuming(self):
         """Stop consuming and close connections."""
