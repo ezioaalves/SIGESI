@@ -182,7 +182,7 @@ Docker + docker-compose
 | 2 | Data Models | All Django models, relationships, enums, migrations | complete | - | 1 | `.claude/PRPs/plans/django-migration-phase2-data-models.plan.md` |
 | 3 | Authentication & Authorization | Google OAuth2 via django-allauth, role-based permissions | complete | - | 2 | `.claude/PRPs/plans/completed/django-migration-phase3-authentication.plan.md` |
 | 4 | Base Modules API | Enderecos, Usuarios, Materiais - shared/foundation endpoints | complete | - | 3 | `.claude/PRPs/plans/completed/django-migration-phase4-base-modules-api.plan.md` |
-| 5 | Solicitacoes & Demandas API | Service requests, work demands, comments, demand-materials | pending | - | 4 | - |
+| 5 | Solicitacoes & Demandas API | Service requests, work demands, comments, demand-materials | complete | - | 4 | `.claude/PRPs/plans/completed/django-migration-phase5-solicitacoes-demandas-api.plan.md` |
 | 6 | Cemetery Management API | Cemiterios, Jazigos, Gavetas, Pessoas with filtering | pending | with 5 | 4 | - |
 | 7 | File Storage & Documents | MinIO integration, file upload/download, PDF generation | pending | - | 4 | - |
 | 8 | Polish & Integration | Global exception handler, CORS, OpenAPI docs, final testing | pending | - | 5, 6, 7 | - |
