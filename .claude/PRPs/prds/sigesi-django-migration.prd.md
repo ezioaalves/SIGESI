@@ -180,7 +180,7 @@ Docker + docker-compose
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Project Setup & Docker | Django project, settings, Docker Compose, PostgreSQL, env vars | complete | - | - | `.claude/PRPs/plans/django-migration-phase1-project-setup.plan.md` |
 | 2 | Data Models | All Django models, relationships, enums, migrations | complete | - | 1 | `.claude/PRPs/plans/django-migration-phase2-data-models.plan.md` |
-| 3 | Authentication & Authorization | Google OAuth2 via django-allauth, role-based permissions | pending | - | 2 | - |
+| 3 | Authentication & Authorization | Google OAuth2 via django-allauth, role-based permissions | in-progress | - | 2 | `.claude/PRPs/plans/django-migration-phase3-authentication.plan.md` |
 | 4 | Base Modules API | Enderecos, Usuarios, Materiais - shared/foundation endpoints | pending | - | 3 | - |
 | 5 | Solicitacoes & Demandas API | Service requests, work demands, comments, demand-materials | pending | - | 4 | - |
 | 6 | Cemetery Management API | Cemiterios, Jazigos, Gavetas, Pessoas with filtering | pending | with 5 | 4 | - |
