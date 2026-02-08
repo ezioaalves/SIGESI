@@ -1,0 +1,1 @@
+"""Solicitacoes models."""

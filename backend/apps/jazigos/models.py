@@ -1,0 +1,1 @@
+"""Jazigos models."""
