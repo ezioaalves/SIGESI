@@ -152,6 +152,28 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Sistema de Gerenciamento da Secretaria de Infraestrutura",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": r"/api/",
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": False,
+        "filter": True,
+    },
+    "TAGS": [
+        {"name": "usuarios", "description": "Gerenciamento de usuarios"},
+        {"name": "solicitacoes", "description": "Solicitacoes de servico dos cidadaos"},
+        {"name": "demandas", "description": "Demandas de trabalho"},
+        {"name": "comentarios", "description": "Comentarios em demandas"},
+        {"name": "materiais", "description": "Catalogo de materiais"},
+        {"name": "documentos", "description": "Documentos oficiais (oficios e memorandos)"},
+        {"name": "arquivos", "description": "Upload e armazenamento de arquivos"},
+        {"name": "enderecos", "description": "Gerenciamento de enderecos"},
+        {"name": "cemiterios", "description": "Gerenciamento de cemiterios"},
+        {"name": "jazigos", "description": "Gerenciamento de jazigos"},
+        {"name": "gavetas", "description": "Gerenciamento de gavetas"},
+        {"name": "pessoas", "description": "Gerenciamento de pessoas"},
+    ],
 }
 
 # CORS

@@ -1,5 +1,6 @@
 """Pessoa ViewSet with filtering and CPF lookup."""
 
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -63,6 +64,20 @@ class PessoaViewSet(ModelViewSet):
         response_serializer = PessoaResponseSerializer(pessoa)
         return Response(response_serializer.data)
 
+    @extend_schema(
+        summary="Buscar pessoa por CPF",
+        description="Retorna uma pessoa pelo numero do CPF.",
+        parameters=[
+            OpenApiParameter(
+                name="cpf",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="Numero do CPF",
+                required=True,
+            ),
+        ],
+        responses={200: PessoaResponseSerializer},
+    )
     @action(
         detail=False,
         methods=["get"],

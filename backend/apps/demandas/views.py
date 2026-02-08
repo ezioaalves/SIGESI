@@ -1,6 +1,7 @@
 """Demanda ViewSet with custom actions for by_solicitacao and by_responsavel."""
 
 from django.db import transaction
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -72,6 +73,11 @@ class DemandaViewSet(ModelViewSet):
         response_serializer = DemandaResponseSerializer(demanda)
         return Response(response_serializer.data)
 
+    @extend_schema(
+        summary="Demandas por solicitacao",
+        description="Retorna demandas vinculadas a uma solicitacao, ordenadas por prazo.",
+        responses={200: DemandaResponseSerializer(many=True)},
+    )
     @action(
         detail=False,
         methods=["get"],
@@ -88,6 +94,20 @@ class DemandaViewSet(ModelViewSet):
         serializer = DemandaResponseSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary="Demandas por responsavel",
+        description="Retorna demandas atribuidas a um responsavel, ordenadas por prazo.",
+        parameters=[
+            OpenApiParameter(
+                name="responsavel_id",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="ID do usuario responsavel",
+                required=True,
+            ),
+        ],
+        responses={200: DemandaResponseSerializer(many=True)},
+    )
     @action(
         detail=False,
         methods=["get"],

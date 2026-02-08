@@ -1,6 +1,7 @@
 """Documento ViewSet with CRUD and PDF generation."""
 
 from django.http import HttpResponse
+from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -66,6 +67,11 @@ class DocumentoViewSet(ModelViewSet):
         response_serializer = DocumentoResponseSerializer(documento)
         return Response(response_serializer.data)
 
+    @extend_schema(
+        summary="Download do documento em PDF",
+        description="Gera e faz download do documento oficial em formato PDF.",
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+    )
     @action(detail=True, methods=["get"], url_path="pdf", url_name="pdf")
     def pdf(self, request, pk=None):
         """Generate and download PDF for a Documento."""

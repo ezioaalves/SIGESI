@@ -185,7 +185,7 @@ Docker + docker-compose
 | 5 | Solicitacoes & Demandas API | Service requests, work demands, comments, demand-materials | complete | - | 4 | `.claude/PRPs/plans/completed/django-migration-phase5-solicitacoes-demandas-api.plan.md` |
 | 6 | Cemetery Management API | Cemiterios, Jazigos, Gavetas, Pessoas with filtering | complete | with 5 | 4 | `.claude/PRPs/plans/django-migration-phase6-cemetery-management-api.plan.md` |
 | 7 | File Storage & Documents | MinIO integration, file upload/download, PDF generation | complete | - | 4 | `.claude/PRPs/plans/django-migration-phase7-file-storage-documents.plan.md` |
-| 8 | Polish & Integration | Global exception handler, CORS, OpenAPI docs, final testing | in-progress | - | 5, 6, 7 | `.claude/PRPs/plans/django-migration-phase8-polish-integration.plan.md` |
+| 8 | Polish & Integration | Global exception handler, CORS, OpenAPI docs, final testing | complete | - | 5, 6, 7 | `.claude/PRPs/plans/completed/django-migration-phase8-polish-integration.plan.md` |
 
 ### Phase Details
 

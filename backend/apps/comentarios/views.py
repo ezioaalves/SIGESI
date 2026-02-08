@@ -1,5 +1,6 @@
 """Comentario ViewSet with by_demanda action and restricted HTTP methods."""
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -34,6 +35,11 @@ class ComentarioViewSet(ModelViewSet):
         response_serializer = ComentarioResponseSerializer(comentario)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        summary="Comentarios por demanda",
+        description="Retorna todos os comentarios de uma demanda.",
+        responses={200: ComentarioResponseSerializer(many=True)},
+    )
     @action(
         detail=False,
         methods=["get"],
