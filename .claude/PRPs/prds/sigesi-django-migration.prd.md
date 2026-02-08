@@ -175,7 +175,7 @@ Docker + docker-compose
 
 | # | Phase | Description | Status | Parallel | Depends | PRP Plan |
 |---|-------|-------------|--------|----------|---------|----------|
-| 1 | Project Setup & Docker | Django project, settings, Docker Compose, PostgreSQL, env vars | pending | - | - | - |
+| 1 | Project Setup & Docker | Django project, settings, Docker Compose, PostgreSQL, env vars | in-progress | - | - | `.claude/PRPs/plans/django-migration-phase1-project-setup.plan.md` |
 | 2 | Data Models | All Django models, relationships, enums, migrations | pending | - | 1 | - |
 | 3 | Authentication & Authorization | Google OAuth2 via django-allauth, role-based permissions | pending | - | 2 | - |
 | 4 | Base Modules API | Enderecos, Usuarios, Materiais - shared/foundation endpoints | pending | - | 3 | - |
