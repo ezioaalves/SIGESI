@@ -133,12 +133,14 @@ Every Spring Boot component has a mature, well-documented Django equivalent. The
 | SpringDoc OpenAPI | drf-spectacular | Auto-generated schema |
 | Checkstyle | ruff / black | Python linting & formatting |
 | application.properties | django-environ + settings.py | Environment-driven config |
+| Maven | uv | Fast Python package management, lockfile support |
 
 **Tech Stack**
 
 ```
 Python 3.12+
-Django 5.1.x
+Python 3.12+
+Django 5.2.x
 djangorestframework 3.15.x
 django-allauth (Google OAuth2)
 django-filter (dynamic filtering)
@@ -149,6 +151,7 @@ minio (Python MinIO client)
 WeasyPrint (PDF generation)
 psycopg2-binary (PostgreSQL)
 gunicorn (production server)
+uv (package management)
 ruff (linting + formatting)
 Docker + docker-compose
 ```
@@ -193,7 +196,7 @@ Docker + docker-compose
   - settings.py with django-environ for env vars
   - Dockerfile for Django app
   - docker-compose.yml with PostgreSQL, MinIO, and Django services
-  - Requirements file with all dependencies
+  - pyproject.toml with uv for dependency management
   - Basic health check endpoint
 - **Success signal**: `docker-compose up` starts all services, Django responds on port 8000
 
@@ -289,6 +292,7 @@ Phases 5 and 6 can run in parallel as they touch different domains (infrastructu
 | Drop RabbitMQ | Yes | Migrate with Celery | Reduces scope and infrastructure complexity, not needed for MVP |
 | Fresh database | Yes | Migrate existing data | No production data exists yet, clean start is simpler |
 | Code quality | ruff | flake8 + black + isort | Single tool replaces multiple, faster, Python community standard |
+| Package manager | uv | pip + pip-tools, poetry | Fastest Python package manager, lockfile by default, from Astral (ruff creators) |
 
 ---
 

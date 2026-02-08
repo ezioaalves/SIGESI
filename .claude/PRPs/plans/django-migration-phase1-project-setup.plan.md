@@ -2,7 +2,7 @@
 
 ## Summary
 
-Set up the foundational Django REST Framework project with Docker Compose orchestration, replacing the existing Spring Boot infrastructure. This includes the Django project skeleton with all 12 domain apps, environment variable management via django-environ, PostgreSQL and MinIO services in Docker Compose, gunicorn for production serving, ruff for code quality, and a health check endpoint to verify the system is running.
+Set up the foundational Django REST Framework project with Docker Compose orchestration, replacing the existing Spring Boot infrastructure. This includes the Django project skeleton with all 12 domain apps, `uv` for Python package management, environment variable management via django-environ, PostgreSQL and MinIO services in Docker Compose, gunicorn for production serving, ruff for code quality, and a health check endpoint to verify the system is running.
 
 ## User Story
 
@@ -16,7 +16,7 @@ The existing Spring Boot project requires Java/Maven expertise the developer lac
 
 ## Solution Statement
 
-Create a new Django 5.1 project in a `backend/` directory at the repository root (preserving the existing Spring Boot code for reference). The project uses a `config/` package for settings, a dedicated `apps/` directory for all 12 domain apps, Docker Compose for orchestration, and gunicorn for production serving. Environment variables mirror the existing `.env.example` format where possible.
+Create a new Django 5.2 project in a `backend/` directory at the repository root (preserving the existing Spring Boot code for reference). The project uses `uv` for package management, a `config/` package for settings, a dedicated `apps/` directory for all 12 domain apps, Docker Compose for orchestration, and gunicorn for production serving. Environment variables mirror the existing `.env.example` format where possible.
 
 ## Metadata
 
@@ -25,7 +25,7 @@ Create a new Django 5.1 project in a `backend/` directory at the repository root
 | Type | NEW_CAPABILITY |
 | Complexity | MEDIUM |
 | Systems Affected | Docker, Django project structure, settings, environment configuration |
-| Dependencies | Django 5.1.x, djangorestframework 3.15.x, django-environ, psycopg2-binary, gunicorn, drf-spectacular, django-cors-headers, django-filter, ruff, minio, WeasyPrint |
+| Dependencies | Django 5.2.x, djangorestframework 3.15.x, django-environ, psycopg2-binary, gunicorn, drf-spectacular, django-cors-headers, django-filter, ruff, minio, WeasyPrint, uv |
 | Estimated Tasks | 12 |
 
 ---
@@ -93,6 +93,10 @@ Create a new Django 5.1 project in a `backend/` directory at the repository root
 | Code quality | Checkstyle (Java) | ruff (Python) | `ruff check .` and `ruff format .` |
 | API docs | `/swagger-ui.html` | `/api/schema/swagger-ui/` | Same Swagger UI experience |
 | Env config | `application.properties` + spring-dotenv | `.env` + django-environ | Same `.env` file pattern |
+| Package mgmt | Maven (`pom.xml`) | uv (`pyproject.toml` + `uv.lock`) | `uv add`, `uv run`, `uv sync` |
+| Add dependency | Edit `pom.xml` + `mvn install` | `uv add <package>` | Single command |
+| Add dev dep | Edit `pom.xml` with scope | `uv add --dev <package>` | Explicit dev group |
+| Run commands | `mvn spring-boot:run` | `uv run python manage.py runserver` | Familiar Python tooling |
 
 ---
 
@@ -117,7 +121,10 @@ Create a new Django 5.1 project in a `backend/` directory at the repository root
 
 | Source | Section | Why Needed |
 |--------|---------|------------|
-| [django-environ docs](https://django-environ.readthedocs.io/) | read_env() behavior | Understand .env loading precedence with Docker |
+| [uv docs - Managing dependencies](https://docs.astral.sh/uv/concepts/projects/dependencies/) | `uv add`, `uv add --dev` | Package management commands |
+| [uv docs - Docker integration](https://docs.astral.sh/uv/guides/integration/docker/) | Dockerfile patterns | How to use uv in Docker builds |
+| [uv docs - Running commands](https://docs.astral.sh/uv/concepts/projects/run/) | `uv run` | Running Django manage.py via uv |
+| [uv docs - Locking and syncing](https://docs.astral.sh/uv/concepts/projects/sync/) | `uv sync --locked` | Reproducible installs in Docker |
 | [drf-spectacular docs](https://drf-spectacular.readthedocs.io/en/latest/readme.html) | Quick Start | Swagger UI setup |
 | [WeasyPrint installation](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html) | System dependencies | Docker image system packages |
 | [Ruff configuration](https://docs.astral.sh/ruff/configuration/) | Rule selection | Django-specific rules (DJ prefix) |
@@ -194,12 +201,42 @@ Map.of(
     "message", ex.getMessage())
 ```
 
+**UV_COMMANDS_REFERENCE:**
+```bash
+# Add production dependencies
+uv add django djangorestframework psycopg2-binary gunicorn
+
+# Add dev-only dependencies (goes to [dependency-groups] dev)
+uv add --dev ruff
+
+# Install all deps from lockfile (replaces pip install -r requirements.txt)
+uv sync
+
+# Install only production deps (for Docker)
+uv sync --locked --no-dev
+
+# Run Django commands through uv
+uv run python manage.py migrate
+uv run python manage.py runserver
+uv run python manage.py collectstatic
+
+# Lock/update dependencies
+uv lock
+uv lock --upgrade              # upgrade all
+uv lock --upgrade-package django  # upgrade specific
+
+# Export to requirements.txt (if needed for compatibility)
+uv export --format requirements.txt --no-dev --output-file requirements.txt
+```
+
 ---
 
 ## Files to Change
 
 | File | Action | Justification |
 |------|--------|---------------|
+| `backend/pyproject.toml` | CREATE | Project metadata, dependencies (via uv), and ruff config |
+| `backend/.python-version` | CREATE | Pin Python 3.12 for uv |
 | `backend/manage.py` | CREATE | Django management script |
 | `backend/config/__init__.py` | CREATE | Config package |
 | `backend/config/settings/__init__.py` | CREATE | Settings package |
@@ -246,12 +283,10 @@ Map.of(
 | `backend/apps/pessoas/__init__.py` | CREATE | Pessoas app init |
 | `backend/apps/pessoas/apps.py` | CREATE | Pessoas app config |
 | `backend/apps/pessoas/models.py` | CREATE | Empty placeholder |
-| `backend/requirements.txt` | CREATE | Python dependencies |
-| `backend/Dockerfile` | CREATE | Multi-stage Docker build for Django |
+| `backend/Dockerfile` | CREATE | Multi-stage Docker build with uv |
 | `backend/docker-compose.yml` | CREATE | Development compose with PostgreSQL + MinIO |
 | `backend/gunicorn.conf.py` | CREATE | Gunicorn production config |
 | `backend/.env.example` | CREATE | Environment variable template |
-| `backend/pyproject.toml` | CREATE | Ruff config and project metadata |
 | `backend/.gitignore` | CREATE | Python-specific gitignore |
 | `backend/.dockerignore` | CREATE | Docker build exclusions |
 
@@ -269,6 +304,7 @@ Map.of(
 - **nginx.conf** - Production reverse proxy stays as-is for now, only dev compose needed
 - **Production docker-compose** - Only dev compose; production compose deferred to Phase 8
 - **Admin interface** - django-admin left at default; customization out of scope per PRD open questions
+- **requirements.txt** - Not needed; uv uses `pyproject.toml` + `uv.lock` natively
 
 ---
 
@@ -276,32 +312,92 @@ Map.of(
 
 Execute in order. Each task is atomic and independently verifiable.
 
-### Task 1: CREATE `backend/requirements.txt`
+### Task 1: CREATE `backend/pyproject.toml` and `backend/.python-version`
 
-- **ACTION**: Create Python dependencies file
+- **ACTION**: Initialize project with uv and configure all dependencies and ruff
 - **IMPLEMENT**:
-  ```
-  Django==5.1.6
-  djangorestframework==3.15.2
-  django-environ==0.12.0
-  django-cors-headers==4.6.0
-  django-filter==24.3
-  drf-spectacular==0.28.0
-  psycopg2-binary==2.9.10
-  gunicorn==23.0.0
-  minio==7.2.15
-  WeasyPrint==63.1
-  ruff==0.9.6
-  ```
-- **GOTCHA**: Use `psycopg2-binary` (not `psycopg2`) to avoid needing libpq-dev at runtime. Pin all versions for reproducible builds.
-- **VALIDATE**: File exists and is valid text
+  - `.python-version`: `3.12`
+  - `pyproject.toml`:
+    ```toml
+    [project]
+    name = "sigesi"
+    version = "0.1.0"
+    description = "SIGESI - Sistema de Gerenciamento da Secretaria de Infraestrutura"
+    readme = "README.md"
+    requires-python = ">=3.12"
+    dependencies = [
+        "django>=5.2,<5.3",
+        "djangorestframework>=3.15,<4.0",
+        "django-environ>=0.12.0",
+        "django-cors-headers>=4.6.0",
+        "django-filter>=24.3",
+        "drf-spectacular>=0.28.0",
+        "psycopg2-binary>=2.9.10",
+        "gunicorn>=23.0.0",
+        "minio>=7.2.15",
+        "weasyprint>=63.1",
+    ]
 
-### Task 2: CREATE `backend/pyproject.toml`
+    [dependency-groups]
+    dev = [
+        "ruff>=0.9.6",
+    ]
 
-- **ACTION**: Create project config with ruff settings
-- **IMPLEMENT**: Ruff configuration targeting Python 3.12, line-length 120, Django-specific rules (E, W, F, I, B, C4, UP, DJ, SIM, N), exclude migrations, per-file ignores for tests and settings
+    [tool.ruff]
+    target-version = "py312"
+    line-length = 120
+    exclude = [
+        ".git",
+        ".venv",
+        "__pycache__",
+        "*/migrations/*",
+        "manage.py",
+    ]
+
+    [tool.ruff.lint]
+    select = [
+        "E",      # pycodestyle errors
+        "W",      # pycodestyle warnings
+        "F",      # pyflakes
+        "I",      # isort
+        "B",      # flake8-bugbear
+        "C4",     # flake8-comprehensions
+        "UP",     # pyupgrade
+        "DJ",     # flake8-django
+        "SIM",    # flake8-simplify
+        "N",      # pep8-naming
+    ]
+    ignore = [
+        "E501",   # line too long (handled by formatter)
+    ]
+    fixable = ["ALL"]
+
+    [tool.ruff.lint.per-file-ignores]
+    "__init__.py" = ["F401"]
+    "**/tests/**" = ["S101", "S106"]
+    "**/migrations/**" = ["E501", "N"]
+    "config/settings/**" = ["F401", "F403"]
+
+    [tool.ruff.lint.isort]
+    known-first-party = ["apps"]
+
+    [tool.ruff.format]
+    quote-style = "double"
+    indent-style = "space"
+    ```
 - **MIRROR**: Code quality expectations from `checkstyle.xml` (max line length 140 → 120 in Python convention)
-- **VALIDATE**: `cd backend && ruff check --config pyproject.toml` runs without config errors
+- **GOTCHA**: Dependencies use version ranges (e.g. `>=5.2,<5.3`) instead of pinned versions because `uv.lock` handles exact pinning. Dev dependencies (ruff) go in `[dependency-groups] dev` per PEP 735.
+- **VALIDATE**: `cd backend && uv lock` generates `uv.lock` successfully
+
+### Task 2: Run `uv sync` to generate lockfile and create venv
+
+- **ACTION**: Generate `uv.lock` and install all dependencies
+- **IMPLEMENT**:
+  ```bash
+  cd backend && uv sync
+  ```
+- **GOTCHA**: This creates `.venv/` and `uv.lock`. The `uv.lock` file MUST be committed to git for reproducible builds. `.venv/` is automatically excluded from git by uv.
+- **VALIDATE**: `uv.lock` exists and `.venv/` directory created with all packages
 
 ### Task 3: CREATE Django project skeleton (`backend/config/` and `backend/manage.py`)
 
@@ -311,8 +407,8 @@ Execute in order. Each task is atomic and independently verifiable.
   - `backend/config/__init__.py` - Empty
   - `backend/config/wsgi.py` - WSGI app, `DJANGO_SETTINGS_MODULE` = `config.settings.production`
   - `backend/config/asgi.py` - ASGI app, `DJANGO_SETTINGS_MODULE` = `config.settings.production`
-- **GOTCHA**: `manage.py` should default to `config.settings.local` (dev), but `wsgi.py`/`asgi.py` should default to `config.settings.production` (production via gunicorn)
-- **VALIDATE**: Files exist with correct `DJANGO_SETTINGS_MODULE` references
+- **GOTCHA**: `manage.py` should default to `config.settings.local` (dev), but `wsgi.py`/`asgi.py` should default to `config.settings.production` (production via gunicorn). Delete any `main.py` created by `uv init` if present.
+- **VALIDATE**: `uv run python manage.py --help` works
 
 ### Task 4: CREATE `backend/config/settings/base.py`
 
@@ -341,7 +437,7 @@ Execute in order. Each task is atomic and independently verifiable.
 - **MIRROR**: Environment variables from `src/main/resources/application.properties` and `.env.example`
 - **MIRROR**: CORS origins from `src/main/java/com/sigesi/sigesi/config/WebConfig.java:15-20`
 - **GOTCHA**: `corsheaders.middleware.CorsMiddleware` MUST be placed before `CommonMiddleware` in MIDDLEWARE list. `AUTH_USER_MODEL` must be set BEFORE first migration.
-- **VALIDATE**: Python syntax is valid: `python -c "import ast; ast.parse(open('backend/config/settings/base.py').read())"`
+- **VALIDATE**: `uv run python -c "import ast; ast.parse(open('config/settings/base.py').read())"`
 
 ### Task 5: CREATE `backend/config/settings/local.py` and `backend/config/settings/production.py`
 
@@ -430,22 +526,23 @@ Execute in order. Each task is atomic and independently verifiable.
 
 ### Task 9: CREATE `backend/Dockerfile`
 
-- **ACTION**: Create multi-stage Dockerfile for Django + WeasyPrint
+- **ACTION**: Create multi-stage Dockerfile using uv for dependency management
 - **IMPLEMENT**:
   - **Builder stage** (`python:3.12-slim`):
-    - Install `gcc`, `libpq-dev` for compiling psycopg2
-    - `pip wheel` all requirements into `/app/wheels`
+    - `COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/` to install uv
+    - Set `UV_COMPILE_BYTECODE=1` and `UV_LINK_MODE=copy`
+    - Copy `pyproject.toml` and `uv.lock` first (cached layer)
+    - `uv sync --locked --no-install-project --no-dev` to install dependencies only
+    - Copy app code, then `uv sync --locked --no-dev` to finalize
   - **Final stage** (`python:3.12-slim`):
     - Install WeasyPrint system deps: `libpq5`, `libpango-1.0-0`, `libpangoft2-1.0-0`, `libharfbuzz-subset0`, `libffi8`, `libjpeg62-turbo`, `libopenjp2-7`, `fonts-liberation`
-    - Install Python wheels from builder
-    - Copy app code
-    - `collectstatic --noinput`
+    - `COPY --from=builder /app /app`
+    - Set `ENV PATH="/app/.venv/bin:$PATH"` to activate venv via PATH
     - Create non-root user `app`
-    - `CMD gunicorn config.wsgi:application --config gunicorn.conf.py`
+    - `CMD ["gunicorn", "config.wsgi:application", "--config", "gunicorn.conf.py"]`
     - `EXPOSE 8000`
   - Set `PYTHONDONTWRITEBYTECODE=1` and `PYTHONUNBUFFERED=1`
-- **MIRROR**: Multi-stage pattern from existing `Dockerfile` (builder → final)
-- **GOTCHA**: Use `python:3.12-slim` NOT alpine (WeasyPrint system deps are painful on Alpine). `collectstatic` may fail if Django can't import settings without DB - use `|| true` fallback.
+- **GOTCHA**: Use `python:3.12-slim` NOT alpine (WeasyPrint system deps are painful on Alpine). The venv is activated via `PATH` not `source activate`. Use `--locked` to ensure builds fail if lockfile is stale. `collectstatic` should run before switching to non-root user: `RUN python manage.py collectstatic --noinput || true`.
 - **VALIDATE**: `docker build -t sigesi-django-test backend/` builds successfully
 
 ### Task 10: CREATE `backend/docker-compose.yml`
@@ -455,12 +552,12 @@ Execute in order. Each task is atomic and independently verifiable.
   - `db` service: `postgres:17`, health check with `pg_isready`, volume `sigesi_data`, port 5432
   - `minio` service: `minio/minio:latest`, ports 9000 + 9001, health check, volume `minio_data`
   - `createbuckets` service: `minio/mc:latest`, depends on minio healthy, creates `sigesi-files` bucket, `restart: "no"`
-  - `web` service: build from `.`, `gunicorn config.wsgi:application --config gunicorn.conf.py`, depends on db healthy and minio healthy, `env_file: .env`, port 8000, runs `python manage.py migrate && gunicorn ...` as entrypoint
+  - `web` service: build from `.`, depends on db healthy and minio healthy, `env_file: .env`, port 8000, entrypoint runs migrations then gunicorn
   - Named volumes: `sigesi_data`, `minio_data`
   - Network: `sigesi-network`
 - **MIRROR**: Service names and configuration from `compose.yaml` at project root
-- **GOTCHA**: The `web` service should run migrations before starting gunicorn. Use a shell entrypoint: `sh -c "python manage.py migrate --noinput && gunicorn config.wsgi:application --config gunicorn.conf.py"`. The `createbuckets` service uses `restart: "no"` since it's a one-shot task.
-- **VALIDATE**: `cd backend && docker-compose config` validates the compose file
+- **GOTCHA**: The `web` service should run migrations before starting gunicorn. Use a shell entrypoint: `sh -c "python manage.py migrate --noinput && gunicorn config.wsgi:application --config gunicorn.conf.py"`. Note that inside the Docker container, `python` is available directly on PATH from the venv (set in Dockerfile). The `createbuckets` service uses `restart: "no"` since it's a one-shot task.
+- **VALIDATE**: `cd backend && docker compose config` validates the compose file
 
 ### Task 11: CREATE `backend/gunicorn.conf.py`
 
@@ -524,6 +621,7 @@ Execute in order. Each task is atomic and independently verifiable.
     docker-compose.yml
     .dockerignore
     ```
+- **GOTCHA**: `.venv` MUST be in `.dockerignore` to prevent local venv from being copied into the Docker image. `uv.lock` should NOT be in `.dockerignore` (it's needed for `uv sync --locked` in the build).
 - **VALIDATE**: Files exist
 
 ---
@@ -534,14 +632,15 @@ Execute in order. Each task is atomic and independently verifiable.
 
 | Check | What It Validates | Command |
 |-------|-------------------|---------|
+| uv sync | Dependencies resolve | `cd backend && uv sync` |
 | Docker build | Dockerfile is valid | `docker build -t sigesi-test backend/` |
-| Compose up | All services start | `cd backend && docker-compose up -d` |
+| Compose up | All services start | `cd backend && docker compose up -d` |
 | Health check | Django responds | `curl http://localhost:8000/api/health/` → `{"status": "ok"}` |
-| PostgreSQL | DB accessible | `docker-compose exec db pg_isready -U postgres` |
+| PostgreSQL | DB accessible | `docker compose exec db pg_isready -U postgres` |
 | MinIO | Storage accessible | `curl http://localhost:9000/minio/health/live` |
 | Swagger UI | API docs render | `curl -s http://localhost:8000/api/schema/swagger-ui/` → 200 |
-| Migrations | Django migrate works | `docker-compose exec web python manage.py migrate --check` |
-| Ruff | Code passes lint | `cd backend && ruff check .` |
+| Migrations | Django migrate works | `docker compose exec web python manage.py migrate --check` |
+| Ruff | Code passes lint | `cd backend && uv run ruff check .` |
 
 ### Edge Cases Checklist
 
@@ -557,7 +656,7 @@ Execute in order. Each task is atomic and independently verifiable.
 ### Level 1: STATIC_ANALYSIS
 
 ```bash
-cd backend && ruff check . && ruff format --check .
+cd backend && uv run ruff check . && uv run ruff format --check .
 ```
 
 **EXPECT**: Exit 0, no errors or warnings
@@ -565,7 +664,7 @@ cd backend && ruff check . && ruff format --check .
 ### Level 2: DJANGO_CHECKS
 
 ```bash
-cd backend && python manage.py check --deploy 2>&1 || true
+cd backend && uv run python manage.py check --deploy 2>&1 || true
 # Note: some deploy checks will warn without HTTPS, that's expected in dev
 ```
 
@@ -582,7 +681,7 @@ cd backend && docker build -t sigesi-django-test .
 ### Level 4: FULL_STACK
 
 ```bash
-cd backend && docker-compose up -d && sleep 10 && curl -f http://localhost:8000/api/health/
+cd backend && docker compose up -d && sleep 10 && curl -f http://localhost:8000/api/health/
 ```
 
 **EXPECT**: Health check returns `{"status": "ok"}`
@@ -599,15 +698,17 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/schema/swagger-
 
 ## Acceptance Criteria
 
-- [ ] `docker-compose up` starts Django, PostgreSQL, and MinIO successfully
+- [ ] `docker compose up` starts Django, PostgreSQL, and MinIO successfully
 - [ ] `GET /api/health/` returns `{"status": "ok"}` with HTTP 200
 - [ ] `GET /api/schema/swagger-ui/` renders Swagger UI
 - [ ] `python manage.py migrate` runs without errors
-- [ ] `ruff check .` passes with no violations
+- [ ] `uv run ruff check .` passes with no violations
 - [ ] All 12 domain apps registered in INSTALLED_APPS
 - [ ] MinIO bucket `sigesi-files` auto-created
 - [ ] `.env.example` contains all required environment variables
 - [ ] AUTH_USER_MODEL set to `usuarios.Usuario` before any migrations
+- [ ] `uv.lock` generated and committed to version control
+- [ ] `pyproject.toml` contains all production deps in `[project] dependencies` and dev deps in `[dependency-groups] dev`
 
 ---
 
@@ -615,10 +716,11 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/schema/swagger-
 
 - [ ] All 12 tasks completed in dependency order
 - [ ] Each task validated immediately after completion
-- [ ] Level 1: ruff passes
-- [ ] Level 3: Docker build succeeds
+- [ ] Level 1: ruff passes (via `uv run ruff check .`)
+- [ ] Level 3: Docker build succeeds (using uv in Dockerfile)
 - [ ] Level 4: Full stack starts and health check passes
 - [ ] Level 5: Swagger UI accessible
+- [ ] `uv.lock` committed
 - [ ] All acceptance criteria met
 
 ---
@@ -632,14 +734,23 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/schema/swagger-
 | django-environ DATABASE_URL parsing | LOW | MED | Use `postgres://` scheme (not `postgresql://`); test with default value |
 | Docker Compose service ordering | LOW | MED | Use `depends_on` with `condition: service_healthy` |
 | Port conflict with existing Spring Boot compose | MED | LOW | Django uses port 8000 (Spring uses 8080); different compose files |
+| uv not available in Docker | LOW | LOW | Copy from official `ghcr.io/astral-sh/uv:latest` image; well-documented pattern |
 
 ---
 
 ## Notes
 
 - The `backend/` directory is created alongside the existing Spring Boot project, not replacing it. This allows reference during migration.
+- **Package management**: `uv` replaces pip + requirements.txt. Dependencies are declared in `pyproject.toml` and locked in `uv.lock`. Key commands:
+  - `uv add <package>` - add production dependency
+  - `uv add --dev <package>` - add dev-only dependency (goes to `[dependency-groups] dev`)
+  - `uv sync` - install all dependencies from lockfile
+  - `uv sync --locked --no-dev` - install production deps only (for Docker)
+  - `uv run <command>` - run command within the project's venv
+  - `uv lock --upgrade` - upgrade all dependencies
 - `AUTH_USER_MODEL = 'usuarios.Usuario'` is set now even though the model is empty. This MUST be set before the first migration is ever run, or Django will create the default User model and switching later requires a complex migration.
 - RabbitMQ is intentionally excluded from docker-compose per PRD decision to drop notifications.
 - The `createbuckets` sidecar service ensures the MinIO bucket exists without needing application-level init code (simpler than the Spring Boot `CommandLineRunner` approach in `SigesiApplication.java`).
 - Production compose and nginx config adaptation are deferred to Phase 8.
 - All app `models.py` files are empty placeholders - Phase 2 will populate them with actual Django models.
+- `uv.lock` should be committed to git for reproducible builds. `.venv/` is auto-excluded by uv's own `.gitignore` inside the venv directory.
