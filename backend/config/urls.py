@@ -21,6 +21,10 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    # App API endpoints
+    path("api/enderecos/", include("apps.enderecos.urls")),
+    path("api/materiais/", include("apps.materiais.urls")),
+    path("api/usuarios/", include("apps.usuarios.urls")),
     # Allauth - OAuth2 callback endpoints (needed even with HEADLESS_ONLY=True)
     path("accounts/", include("allauth.urls")),
     # Allauth - Headless API endpoints (/_allauth/browser/v1/...)
