@@ -1,6 +1,5 @@
 """Usuario ViewSet with custom actions for /me and /toggle-ativo."""
 
-from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -9,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.core.permissions import IsActiveAuthenticated, IsAdmin
 from apps.usuarios.models import Usuario
+from apps.usuarios.schema import usuario_schema
 from apps.usuarios.serializers import (
     UsuarioMeSerializer,
     UsuarioResponseSerializer,
@@ -25,6 +25,7 @@ def _validate_editable(pk):
         raise PermissionDenied(PROTECTED_USER_MESSAGE)
 
 
+@usuario_schema
 class UsuarioViewSet(ModelViewSet):
     """ViewSet for Usuario management with /me and /toggle-ativo actions."""
 
@@ -61,23 +62,12 @@ class UsuarioViewSet(ModelViewSet):
         usuario.save(update_fields=["role"])
         return Response(UsuarioResponseSerializer(usuario).data)
 
-    @extend_schema(
-        summary="Dados do usuario autenticado",
-        description="Retorna informacoes do usuario atualmente autenticado.",
-        responses={200: UsuarioMeSerializer},
-    )
     @action(detail=False, methods=["get"])
     def me(self, request):
         """Return current authenticated user info."""
         serializer = UsuarioMeSerializer(request.user)
         return Response(serializer.data)
 
-    @extend_schema(
-        summary="Alternar status ativo do usuario",
-        description="Inverte o status ativo/inativo de um usuario. Usuario pk=1 e protegido.",
-        request=None,
-        responses={200: UsuarioResponseSerializer},
-    )
     @action(detail=True, methods=["patch"], url_path="toggle-ativo")
     def toggle_ativo(self, request, pk=None):
         """Toggle user active status. Protected user pk=1 cannot be toggled."""

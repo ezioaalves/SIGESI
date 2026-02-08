@@ -3,7 +3,6 @@
 import logging
 
 from django.http import HttpResponse
-from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -11,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from apps.arquivos.models import Arquivo
+from apps.arquivos.schema import arquivo_schema
 from apps.arquivos.serializers import (
     ArquivoResponseSerializer,
     FileUrlResponseSerializer,
@@ -28,6 +28,7 @@ from apps.core.permissions import IsAllRoles
 logger = logging.getLogger(__name__)
 
 
+@arquivo_schema
 class ArquivoViewSet(ModelViewSet):
     """ViewSet for Arquivo CRUD with file storage operations."""
 
@@ -42,21 +43,6 @@ class ArquivoViewSet(ModelViewSet):
             return Arquivo.objects.filter(ativo=True).order_by("-uploaded_at")
         return Arquivo.objects.all().order_by("-uploaded_at")
 
-    @extend_schema(
-        summary="Upload de arquivo",
-        description="Faz upload de um arquivo para o MinIO. Maximo 10MB por arquivo.",
-        request={
-            "multipart/form-data": {
-                "type": "object",
-                "properties": {
-                    "file": {"type": "string", "format": "binary"},
-                    "categoria": {"type": "string", "description": "Categoria do arquivo"},
-                },
-                "required": ["file"],
-            },
-        },
-        responses={201: ArquivoResponseSerializer},
-    )
     @action(
         detail=False,
         methods=["post"],
@@ -86,11 +72,6 @@ class ArquivoViewSet(ModelViewSet):
         serializer = ArquivoResponseSerializer(arquivo)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @extend_schema(
-        summary="URL de download temporaria",
-        description="Gera URL pre-assinada para download direto do MinIO (60 min).",
-        responses={200: FileUrlResponseSerializer},
-    )
     @action(detail=True, methods=["get"], url_path="url", url_name="presigned-url")
     def presigned_url(self, request, pk=None):
         """Generate a presigned download URL (60 min expiry)."""
@@ -107,11 +88,6 @@ class ArquivoViewSet(ModelViewSet):
         serializer = FileUrlResponseSerializer(data)
         return Response(serializer.data)
 
-    @extend_schema(
-        summary="Download de arquivo",
-        description="Download do arquivo via proxy do servidor.",
-        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
-    )
     @action(detail=True, methods=["get"], url_path="download", url_name="download")
     def download(self, request, pk=None):
         """Proxy download a file from MinIO."""

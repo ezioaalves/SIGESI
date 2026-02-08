@@ -1,6 +1,5 @@
 """Pessoa ViewSet with filtering and CPF lookup."""
 
-from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,6 +10,7 @@ from apps.core.permissions import IsAllRoles
 from apps.enderecos.models import Endereco
 from apps.pessoas.filters import PessoaFilter
 from apps.pessoas.models import Pessoa
+from apps.pessoas.schema import pessoa_schema
 from apps.pessoas.serializers import (
     PessoaCreateSerializer,
     PessoaResponseSerializer,
@@ -18,6 +18,7 @@ from apps.pessoas.serializers import (
 )
 
 
+@pessoa_schema
 class PessoaViewSet(ModelViewSet):
     """ViewSet for Pessoa CRUD with filtering and CPF lookup."""
 
@@ -64,20 +65,6 @@ class PessoaViewSet(ModelViewSet):
         response_serializer = PessoaResponseSerializer(pessoa)
         return Response(response_serializer.data)
 
-    @extend_schema(
-        summary="Buscar pessoa por CPF",
-        description="Retorna uma pessoa pelo numero do CPF.",
-        parameters=[
-            OpenApiParameter(
-                name="cpf",
-                type=str,
-                location=OpenApiParameter.QUERY,
-                description="Numero do CPF",
-                required=True,
-            ),
-        ],
-        responses={200: PessoaResponseSerializer},
-    )
     @action(
         detail=False,
         methods=["get"],
