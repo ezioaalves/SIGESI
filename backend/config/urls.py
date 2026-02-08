@@ -32,6 +32,8 @@ urlpatterns = [
     path("api/jazigos/", include("apps.jazigos.urls")),
     path("api/gavetas/", include("apps.gavetas.urls")),
     path("api/pessoas/", include("apps.pessoas.urls")),
+    path("api/arquivos/", include("apps.arquivos.urls")),
+    path("api/documentos/", include("apps.documentos.urls")),
     # Allauth - OAuth2 callback endpoints (needed even with HEADLESS_ONLY=True)
     path("accounts/", include("allauth.urls")),
     # Allauth - Headless API endpoints (/_allauth/browser/v1/...)

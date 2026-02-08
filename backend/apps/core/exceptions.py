@@ -24,6 +24,22 @@ class ConflictException(APIException):
     default_code = "conflict"
 
 
+class InvalidFileException(APIException):
+    """Invalid file error (400)."""
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = "Arquivo invalido."
+    default_code = "invalid_file"
+
+
+class StorageException(APIException):
+    """Storage error (500)."""
+
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_detail = "Erro no armazenamento."
+    default_code = "storage_error"
+
+
 def _extract_first_message(detail):
     """Extract the first error message from DRF ValidationError detail."""
     if isinstance(detail, str):
@@ -50,6 +66,7 @@ def _error_label(status_code):
         404: "Not Found",
         405: "Method Not Allowed",
         409: "Conflito",
+        413: "Payload Too Large",
         429: "Too Many Requests",
         500: "Internal Server Error",
     }
