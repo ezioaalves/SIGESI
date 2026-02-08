@@ -28,6 +28,10 @@ urlpatterns = [
     path("api/solicitacoes/", include("apps.solicitacoes.urls")),
     path("api/demandas/", include("apps.demandas.urls")),
     path("api/comentarios/", include("apps.comentarios.urls")),
+    path("api/cemiterios/", include("apps.cemiterios.urls")),
+    path("api/jazigos/", include("apps.jazigos.urls")),
+    path("api/gavetas/", include("apps.gavetas.urls")),
+    path("api/pessoas/", include("apps.pessoas.urls")),
     # Allauth - OAuth2 callback endpoints (needed even with HEADLESS_ONLY=True)
     path("accounts/", include("allauth.urls")),
     # Allauth - Headless API endpoints (/_allauth/browser/v1/...)
