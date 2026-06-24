@@ -1,0 +1,8 @@
+{$APP_DOMAIN} {
+    encode zstd gzip
+
+    @backend path /api* /oauth2* /login* /logout* /swagger-ui* /v3/api-docs*
+    reverse_proxy @backend sigesi-backend:8080
+
+    reverse_proxy sigesi-frontend:80
+}

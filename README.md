@@ -18,7 +18,7 @@ Sistema web para gerenciamento de demandas da Secretaria de Infraestrutura, incl
 | Qualidade de codigo | Checkstyle |
 | Build | Maven |
 | Containerizacao | Docker / Docker Compose |
-| CI/CD | GitHub Actions |
+| CI/CD | GitHub Actions + Docker Hub + Docker Compose |
 
 ## Pre-requisitos
 
@@ -199,30 +199,43 @@ Todos os endpoints requerem autenticacao OAuth2.
 O arquivo `compose-prod.yaml` configura o ambiente completo de producao:
 
 ```
-┌─────────┐     ┌──────────┐     ┌────────────┐
-│  Nginx  │────>│ Frontend │     │  RabbitMQ  │
-│  :80    │────>│          │     │ :5672/:15672│
-└─────────┘     └──────────┘     └─────┬──────┘
-      │                                │
-      v                                v
-┌──────────┐     ┌────────┐     ┌─────────────────┐
-│ Backend  │────>│  MinIO │     │  Notification   │
-│  :8080   │     │ :9000  │     │    Service      │
-└────┬─────┘     └────────┘     └───────┬─────────┘
-     │                                  │
-     v                                  v
-┌──────────┐                    ┌──────────────┐
-│ Postgres │                    │ Postgres     │
-│   :5432  │                    │ (notif) :5433│
-└──────────┘                    └──────────────┘
+┌─────────┐     ┌──────────┐
+│  Caddy  │────>│ Frontend │
+│ :80/443 │     │   :80    │
+└─────────┘     └──────────┘
+      │
+      v
+┌──────────┐     ┌────────┐     ┌──────────┐
+│ Backend  │────>│  MinIO │     │ RabbitMQ │
+│  :8080   │     │ :9000  │     │  :5672   │
+└────┬─────┘     └────────┘     └──────────┘
+     │
+     v
+┌──────────┐
+│ Postgres │
+│   :5432  │
+└──────────┘
 ```
 
 ### CI/CD
 
+O projeto usa dois repositorios:
+
+- Backend e infraestrutura: `ezioaalves/SIGESI`
+- Frontend: `ezioaalves/sigesi-frontend`
+
 O pipeline GitHub Actions executa automaticamente:
 
-- **CI** (push/PR para `main`/`develop`): build, checkstyle, testes
-- **CD** (push para `main`/`develop`): build da imagem Docker, push para Docker Hub, deploy na VPS
+- **CI** (push/PR para `main`/`develop`): build, checkstyle e testes do backend.
+- **CD** (push para `main`): build da imagem Docker, push para Docker Hub e deploy na VPS.
+
+O ambiente publico de producao usa Caddy com HTTPS automatico em:
+
+```text
+https://sigesi.ezioalves.cloud
+```
+
+Os detalhes de VPS, secrets e rollback estao em [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Qualidade de codigo
 
