@@ -112,6 +112,7 @@ jobs:
             docker compose -p "$COMPOSE_PROJECT" -f compose.yaml pull "$BACKEND_SERVICE"
             docker compose -p "$COMPOSE_PROJECT" -f compose.yaml up -d db rabbitmq minio "$BACKEND_SERVICE"
             docker network connect "${COMPOSE_PROJECT}_default" sigesi-nginx-1 2>/dev/null || true
+            docker exec sigesi-nginx-1 nginx -s reload
 
             if [ "${{ github.ref_name }}" = "main" ]; then
               docker rm -f notification-service sigesi-notification-db 2>/dev/null || true
