@@ -1,21 +1,4 @@
 services:
-  caddy:
-    image: caddy:2-alpine
-    container_name: sigesi-caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    env_file:
-      - .env
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - sigesi-backend
-      - sigesi-frontend
-    restart: always
-
   db:
     image: postgres:17
     env_file:
@@ -47,6 +30,10 @@ services:
       - .env
     expose:
       - "8080"
+    networks:
+      default:
+        aliases:
+          - backend
     restart: always
 
   sigesi-frontend:
@@ -91,5 +78,3 @@ volumes:
   sigesi_data:
   minio_data:
   rabbitmq_data:
-  caddy_data:
-  caddy_config:

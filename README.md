@@ -194,13 +194,20 @@ Todos os endpoints requerem autenticacao OAuth2.
 
 ## Deploy
 
-### Producao com Docker Compose
+### Producao e teste com Docker Compose
 
-O arquivo `compose-prod.yaml` configura o ambiente completo de producao:
+O deploy usa duas stacks Compose na mesma VPS:
+
+```text
+develop -> https://sigesi-test.ezioalves.cloud
+main    -> https://sigesi.ezioalves.cloud
+```
+
+O nginx existente na VPS fica como gateway publico HTTPS. As stacks Docker expoem apenas os servicos internos usados pelo gateway:
 
 ```
 ┌─────────┐     ┌──────────┐
-│  Caddy  │────>│ Frontend │
+│  nginx  │────>│ Frontend │
 │ :80/443 │     │   :80    │
 └─────────┘     └──────────┘
       │
@@ -227,12 +234,14 @@ O projeto usa dois repositorios:
 O pipeline GitHub Actions executa automaticamente:
 
 - **CI** (push/PR para `main`/`develop`): build, checkstyle e testes do backend.
-- **CD** (push para `main`): build da imagem Docker, push para Docker Hub e deploy na VPS.
+- **CD teste** (push para `develop`): build das imagens Docker, push para Docker Hub e deploy em `sigesi-test.ezioalves.cloud`.
+- **CD producao** (push para `main`): build das imagens Docker, push para Docker Hub e deploy em `sigesi.ezioalves.cloud`.
 
-O ambiente publico de producao usa Caddy com HTTPS automatico em:
+Ambientes publicos:
 
 ```text
 https://sigesi.ezioalves.cloud
+https://sigesi-test.ezioalves.cloud
 ```
 
 Os detalhes de VPS, secrets e rollback estao em [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
