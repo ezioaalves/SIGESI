@@ -1,0 +1,120 @@
+name: Backend CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/sigesi-backend:${{ github.ref_name }}-latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/sigesi-backend:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy compose files to VPS
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "compose-prod.yaml,compose-test.yaml"
+          target: "/root/pipeline/deploy-assets"
+
+      - name: Deploy backend on VPS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          debug: true
+          script: |
+            set -e
+
+            if [ "${{ github.ref_name }}" = "main" ]; then
+              DEPLOY_DIR="/root/pipeline/sigesi"
+              COMPOSE_SOURCE="compose-prod.yaml"
+              COMPOSE_PROJECT="sigesi"
+              BACKEND_SERVICE="sigesi-backend"
+              APP_PUBLIC_URL="https://sigesi.ezioalves.cloud"
+              APP_DOMAIN="sigesi.ezioalves.cloud"
+              APP_CORS_ALLOWED_ORIGINS="https://sigesi.ezioalves.cloud,http://localhost:3000"
+              OAUTH2_SUCCESS_REDIRECT="https://sigesi.ezioalves.cloud/portal"
+              OAUTH2_FAILURE_REDIRECT="https://sigesi.ezioalves.cloud/?authError=usuario_inativo"
+              OAUTH2_LOGOUT_REDIRECT="https://sigesi.ezioalves.cloud"
+            else
+              DEPLOY_DIR="/root/pipeline/sigesi-test"
+              COMPOSE_SOURCE="compose-test.yaml"
+              COMPOSE_PROJECT="sigesi-test"
+              BACKEND_SERVICE="backend"
+              APP_PUBLIC_URL="https://sigesi-test.ezioalves.cloud"
+              APP_DOMAIN="sigesi-test.ezioalves.cloud"
+              APP_CORS_ALLOWED_ORIGINS="https://sigesi-test.ezioalves.cloud,http://localhost:3000"
+              OAUTH2_SUCCESS_REDIRECT="https://sigesi-test.ezioalves.cloud/portal"
+              OAUTH2_FAILURE_REDIRECT="https://sigesi-test.ezioalves.cloud/?authError=usuario_inativo"
+              OAUTH2_LOGOUT_REDIRECT="https://sigesi-test.ezioalves.cloud"
+            fi
+
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+            cp "/root/pipeline/deploy-assets/$COMPOSE_SOURCE" compose.yaml
+
+            cat > .env <<EOF
+            APP_PUBLIC_URL=$APP_PUBLIC_URL
+            APP_DOMAIN=$APP_DOMAIN
+            APP_CORS_ALLOWED_ORIGINS=$APP_CORS_ALLOWED_ORIGINS
+            OAUTH2_SUCCESS_REDIRECT=$OAUTH2_SUCCESS_REDIRECT
+            OAUTH2_FAILURE_REDIRECT=$OAUTH2_FAILURE_REDIRECT
+            OAUTH2_LOGOUT_REDIRECT=$OAUTH2_LOGOUT_REDIRECT
+            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            IMAGE_TAG=${{ github.ref_name }}-latest
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DB_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_URL=jdbc:postgresql://db:5432/${{ secrets.DATABASE_NAME }}
+            MINIO_ENDPOINT=http://minio:9000
+            MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
+            MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            RABBITMQ_HOST=rabbitmq
+            RABBITMQ_PORT=5672
+            RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
+            RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+            EOF
+
+            docker compose -p "$COMPOSE_PROJECT" -f compose.yaml pull "$BACKEND_SERVICE"
+            docker compose -p "$COMPOSE_PROJECT" -f compose.yaml up -d db rabbitmq minio "$BACKEND_SERVICE"
+            docker network connect "${COMPOSE_PROJECT}_default" sigesi-nginx-1 2>/dev/null || true
+
+            if [ "${{ github.ref_name }}" = "main" ]; then
+              docker rm -f notification-service sigesi-notification-db 2>/dev/null || true
+            fi
+
+            docker compose -p "$COMPOSE_PROJECT" -f compose.yaml ps
