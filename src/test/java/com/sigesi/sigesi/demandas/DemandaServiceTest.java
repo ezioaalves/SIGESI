@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.demandas.dtos.DemandaCreateDTO;
@@ -246,6 +247,11 @@ class DemandaServiceTest {
 
     assertNotNull(resultado);
     verify(materialService, times(1)).getMaterialEntityById(10L);
+    assertEquals(1, novaDemanda.getMateriais().size());
+    DemandaMaterial demandaMaterial = novaDemanda.getMateriais().iterator().next();
+    assertEquals(material, demandaMaterial.getMaterial());
+    assertEquals(5, demandaMaterial.getQuantidade());
+    assertEquals(novaDemanda, demandaMaterial.getDemanda());
   }
 
   @Test
@@ -319,6 +325,33 @@ class DemandaServiceTest {
     demandaService.updateDemanda(1L, updateDTO);
 
     verify(materialService, times(1)).getMaterialEntityById(10L);
+    assertEquals(1, demanda.getMateriais().size());
+    DemandaMaterial demandaMaterial = demanda.getMateriais().iterator().next();
+    assertEquals(material, demandaMaterial.getMaterial());
+    assertEquals(3, demandaMaterial.getQuantidade());
+  }
+
+  @Test
+  @DisplayName("Deve rejeitar materiais duplicados na demanda")
+  void testCreateDemandaRejeitaMateriaisDuplicados() {
+    DemandaCreateDTO createDTO = new DemandaCreateDTO();
+    createDTO.setSolicitacaoId(1L);
+    createDTO.setPrazo(LocalDate.now().plusDays(7));
+    createDTO.setMateriais(List.of(
+        new DemandaMaterialCreateDTO(10L, 3),
+        new DemandaMaterialCreateDTO(10L, 4)));
+
+    Demanda novaDemanda = Demanda.builder()
+        .id(1L).solicitacao(solicitacao)
+        .prazo(LocalDate.now().plusDays(7)).status(DemandaStatus.PENDENTE)
+        .build();
+
+    when(solicitacaoService.getSolicitacaoEntityById(1L)).thenReturn(solicitacao);
+    when(demandaMapper.toEntity(createDTO)).thenReturn(novaDemanda);
+
+    assertThrows(ResponseStatusException.class,
+        () -> demandaService.createDemanda(createDTO));
+    verify(demandaRepository, never()).save(any());
   }
 
   @Test

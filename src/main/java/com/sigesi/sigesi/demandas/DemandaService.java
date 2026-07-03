@@ -1,11 +1,15 @@
 package com.sigesi.sigesi.demandas;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.demandas.dtos.DemandaCreateDTO;
@@ -170,7 +174,13 @@ public class DemandaService {
     if (items == null || items.isEmpty()) {
       return;
     }
+    Set<Long> materialIds = new HashSet<>();
     for (DemandaMaterialCreateDTO item : items) {
+      if (!materialIds.add(item.getMaterialId())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Material duplicado na demanda: " + item.getMaterialId());
+      }
       Material material = materialService
           .getMaterialEntityById(item.getMaterialId());
       DemandaMaterial dm = DemandaMaterial.builder()

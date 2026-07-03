@@ -6,6 +6,7 @@ import java.util.List;
 import com.sigesi.sigesi.demandas.DemandaStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,6 @@ public class DemandaUpdateDTO {
   private DemandaStatus status;
 
   @Schema(description = "Materiais com quantidade")
+  @Valid
   private List<DemandaMaterialCreateDTO> materiais;
 }

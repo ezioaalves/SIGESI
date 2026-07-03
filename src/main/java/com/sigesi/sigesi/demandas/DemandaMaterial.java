@@ -16,7 +16,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Entidade intermediaria entre Demanda e Material com quantidade.
@@ -28,6 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Audited
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DemandaMaterial {
 
   @Id
@@ -36,10 +39,12 @@ public class DemandaMaterial {
 
   @ManyToOne
   @JoinColumn(name = "demanda_id", nullable = false)
+  @ToString.Exclude
   private Demanda demanda;
 
   @ManyToOne
   @JoinColumn(name = "material_id", nullable = false)
+  @EqualsAndHashCode.Include
   private Material material;
 
   @NotNull(message = "Quantidade é obrigatória")

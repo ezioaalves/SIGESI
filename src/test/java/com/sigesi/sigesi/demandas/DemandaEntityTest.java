@@ -128,6 +128,30 @@ class DemandaEntityTest {
   }
 
   @Test
+  @DisplayName("Deve manter materiais diferentes no conjunto")
+  void testAddMultiplosDemandaMaterial() {
+    Demanda demanda = Demanda.builder()
+        .solicitacao(solicitacao)
+        .prazo(LocalDate.now().plusDays(7))
+        .status(DemandaStatus.PENDENTE)
+        .build();
+
+    DemandaMaterial cimento = DemandaMaterial.builder()
+        .material(Material.builder().id(1L).nome("Cimento").preco(50.0).build())
+        .quantidade(10)
+        .build();
+    DemandaMaterial areia = DemandaMaterial.builder()
+        .material(Material.builder().id(2L).nome("Areia").preco(30.0).build())
+        .quantidade(20)
+        .build();
+
+    demanda.addDemandaMaterial(cimento);
+    demanda.addDemandaMaterial(areia);
+
+    assertEquals(2, demanda.getMateriais().size());
+  }
+
+  @Test
   @DisplayName("Deve remover DemandaMaterial e limpar referencia")
   void testRemoveDemandaMaterial() {
     Demanda demanda = Demanda.builder()
@@ -140,9 +164,7 @@ class DemandaEntityTest {
     DemandaMaterial dm = DemandaMaterial.builder().material(material).quantidade(5).build();
     demanda.addDemandaMaterial(dm);
 
-    // Use iterator to avoid ConcurrentModificationException and StackOverflow from hashCode
-    demanda.getMateriais().clear();
-    dm.setDemanda(null);
+    demanda.removeDemandaMaterial(dm);
 
     assertTrue(demanda.getMateriais().isEmpty());
     assertNull(dm.getDemanda());

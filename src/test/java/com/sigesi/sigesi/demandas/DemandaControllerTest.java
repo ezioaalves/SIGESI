@@ -31,8 +31,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.demandas.dtos.DemandaCreateDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaMaterialCreateDTO;
+import com.sigesi.sigesi.demandas.dtos.DemandaMaterialResponseDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaResponseDTO;
 import com.sigesi.sigesi.demandas.dtos.DemandaUpdateDTO;
+import com.sigesi.sigesi.materiais.dtos.MaterialResponseDTO;
 import com.sigesi.sigesi.usuarios.Usuario;
 
 /**
@@ -146,6 +148,31 @@ class DemandaControllerTest {
         .content(objectMapper.writeValueAsString(createDto)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", is(1)));
+  }
+
+  @Test
+  @DisplayName("GET /api/demandas/{id} retorna materiais com quantidade")
+  void testGetByIdRetornaMateriaisComQuantidade() throws Exception {
+    DemandaResponseDTO dto = responseDto(1L, DemandaStatus.PENDENTE);
+    dto.setMateriais(new HashSet<>(List.of(
+        DemandaMaterialResponseDTO.builder()
+            .id(10L)
+            .material(MaterialResponseDTO.builder()
+                .id(2L)
+                .nome("Cimento")
+                .preco(50.0)
+                .build())
+            .quantidade(5)
+            .build())));
+
+    given(service.getDemandaById(1L)).willReturn(dto);
+
+    mockMvc.perform(get("/api/demandas/1").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.materiais", hasSize(1)))
+        .andExpect(jsonPath("$.materiais[0].material.id", is(2)))
+        .andExpect(jsonPath("$.materiais[0].material.nome", is("Cimento")))
+        .andExpect(jsonPath("$.materiais[0].quantidade", is(5)));
   }
 
   @Test

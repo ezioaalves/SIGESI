@@ -25,7 +25,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Entidade que representa uma demanda de trabalho.
@@ -36,10 +38,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Audited
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Demanda {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @EqualsAndHashCode.Include
   private Long id;
 
   @NotNull(message = "Solicitação é obrigatória")
@@ -62,6 +66,8 @@ public class Demanda {
   @OneToMany(mappedBy = "demanda",
       cascade = CascadeType.ALL,
       orphanRemoval = true)
+  @EqualsAndHashCode.Exclude
+  @ToString.Exclude
   private Set<DemandaMaterial> materiais = new HashSet<>();
 
   /**
