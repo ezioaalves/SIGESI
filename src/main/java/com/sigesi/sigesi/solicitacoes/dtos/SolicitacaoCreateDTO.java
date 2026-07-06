@@ -24,8 +24,9 @@ public class SolicitacaoCreateDTO {
 
   private java.util.List<Long> anexoIds;
 
-  @NotNull(message = "Autor é obrigatório")
   private Long autorId;
+
+  private Long solicitanteId;
 
   @NotNull(message = "Local é obrigatório")
   private Long localId;

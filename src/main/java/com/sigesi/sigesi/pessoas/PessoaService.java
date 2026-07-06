@@ -68,12 +68,12 @@ public class PessoaService {
   }
 
   public PessoaResponseDTO updatePessoa(Long id, PessoaUpdateDTO pessoaDTO) {
-    Pessoa pessoa = this.getPessoEntityById(id);
+    Pessoa pessoa = this.getPessoaEntityById(id);
 
     pessoaMapper.updateFromDto(pessoaDTO, pessoa);
 
     if (pessoaDTO.getEnderecoId() != null) {
-      Endereco endereco = enderecoService.getEnderecoEntityById(id);
+      Endereco endereco = enderecoService.getEnderecoEntityById(pessoaDTO.getEnderecoId());
       pessoa.setEndereco(endereco);
     }
 
@@ -82,12 +82,12 @@ public class PessoaService {
   }
 
   public void deletePessoa(Long id) {
-    Pessoa pessoa = this.getPessoEntityById(id);
+    Pessoa pessoa = this.getPessoaEntityById(id);
 
     pessoaRepository.delete(pessoa);
   }
 
-  public Pessoa getPessoEntityById(Long id) {
+  public Pessoa getPessoaEntityById(Long id) {
     return pessoaRepository.findById(id).orElseThrow(() -> new NotFoundException("pessoa não encontrada com id " + id));
   }
 

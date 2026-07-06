@@ -21,12 +21,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.sigesi.sigesi.arquivos.Arquivo;
 import com.sigesi.sigesi.arquivos.ArquivoService;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
+import com.sigesi.sigesi.pessoas.Pessoa;
+import com.sigesi.sigesi.pessoas.PessoaService;
+import com.sigesi.sigesi.pessoas.SexoEnum;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoUpdateDTO;
@@ -51,6 +55,9 @@ class SolicitacaoServiceTest {
   private UsuarioService usuarioService;
 
   @Mock
+  private PessoaService pessoaService;
+
+  @Mock
   private EnderecoService enderecoService;
 
   @Mock
@@ -62,6 +69,7 @@ class SolicitacaoServiceTest {
   private Usuario adminUser;
   private Usuario operadorUser;
   private Usuario cidadaoUser;
+  private Pessoa cidadaoPessoa;
   private Endereco endereco;
   private Solicitacao solicitacao;
   private SolicitacaoResponseDTO responseDTO;
@@ -71,11 +79,17 @@ class SolicitacaoServiceTest {
     adminUser = Usuario.builder().id(1L).role(Role.ADMIN).email("admin@test.com").build();
     operadorUser = Usuario.builder().id(2L).role(Role.OPERADOR).email("op@test.com").build();
     cidadaoUser = Usuario.builder().id(3L).role(Role.CIDADAO).email("user@test.com").build();
+    cidadaoPessoa = Pessoa.builder()
+        .id(4L)
+        .nome("Cidadao Teste")
+        .cpf("12345678900")
+        .sexo(SexoEnum.MASCULINO)
+        .build();
     endereco = Endereco.builder()
         .id(1L).logradouro("Rua A").numero("1").bairro("Centro")
         .build();
     solicitacao = Solicitacao.builder()
-        .id(1L).body("Descricao").autor(cidadaoUser).local(endereco)
+        .id(1L).body("Descricao").autor(cidadaoUser).solicitante(cidadaoPessoa).local(endereco)
         .status(SolicitacaoStatus.ABERTA)
         .build();
     responseDTO = mock(SolicitacaoResponseDTO.class);
@@ -147,6 +161,28 @@ class SolicitacaoServiceTest {
     SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
     createDTO.setAssunto(SolicitacaoAssunto.BURACO);
     createDTO.setBody("Descricao do problema");
+    createDTO.setSolicitanteId(4L);
+    createDTO.setLocalId(1L);
+
+    when(pessoaService.getPessoaEntityById(4L)).thenReturn(cidadaoPessoa);
+    when(enderecoService.getEnderecoEntityById(1L)).thenReturn(endereco);
+    when(solicitacaoMapper.toEntity(createDTO)).thenReturn(solicitacao);
+    when(solicitacaoRepository.save(any())).thenReturn(solicitacao);
+    when(solicitacaoMapper.toDto(any())).thenReturn(responseDTO);
+
+    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO);
+
+    assertNotNull(resultado);
+    verify(solicitacaoRepository, times(1)).save(any());
+    verify(usuarioService, never()).getUsuarioById(any());
+  }
+
+  @Test
+  @DisplayName("Deve criar solicitacao legada com autor")
+  void testCreateSolicitacaoLegadaComAutor() {
+    SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
+    createDTO.setAssunto(SolicitacaoAssunto.BURACO);
+    createDTO.setBody("Descricao do problema");
     createDTO.setAutorId(3L);
     createDTO.setLocalId(1L);
 
@@ -159,7 +195,22 @@ class SolicitacaoServiceTest {
     SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO);
 
     assertNotNull(resultado);
+    verify(pessoaService, never()).getPessoaEntityById(any());
     verify(solicitacaoRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("Deve rejeitar solicitacao sem solicitante nem autor legado")
+  void testCreateSolicitacaoSemSolicitanteNemAutor() {
+    SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
+    createDTO.setAssunto(SolicitacaoAssunto.BURACO);
+    createDTO.setBody("Descricao");
+    createDTO.setLocalId(1L);
+
+    assertThrows(ResponseStatusException.class,
+        () -> solicitacaoService.createSolicitacao(createDTO));
+
+    verify(solicitacaoRepository, never()).save(any());
   }
 
   @Test
@@ -168,14 +219,14 @@ class SolicitacaoServiceTest {
     SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
     createDTO.setAssunto(SolicitacaoAssunto.BURACO);
     createDTO.setBody("Descricao");
-    createDTO.setAutorId(3L);
+    createDTO.setSolicitanteId(4L);
     createDTO.setLocalId(1L);
     createDTO.setAnexoIds(List.of(10L, 20L));
 
     Arquivo arq1 = Arquivo.builder().id(10L).nomeOriginal("a.pdf").build();
     Arquivo arq2 = Arquivo.builder().id(20L).nomeOriginal("b.pdf").build();
 
-    when(usuarioService.getUsuarioById(3L)).thenReturn(cidadaoUser);
+    when(pessoaService.getPessoaEntityById(4L)).thenReturn(cidadaoPessoa);
     when(enderecoService.getEnderecoEntityById(1L)).thenReturn(endereco);
     when(solicitacaoMapper.toEntity(createDTO)).thenReturn(solicitacao);
     when(arquivoService.getArquivoEntityById(10L)).thenReturn(arq1);
@@ -196,10 +247,10 @@ class SolicitacaoServiceTest {
     SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
     createDTO.setAssunto(SolicitacaoAssunto.ESGOTO);
     createDTO.setBody("Descricao");
-    createDTO.setAutorId(3L);
+    createDTO.setSolicitanteId(4L);
     createDTO.setLocalId(1L);
 
-    when(usuarioService.getUsuarioById(3L)).thenReturn(cidadaoUser);
+    when(pessoaService.getPessoaEntityById(4L)).thenReturn(cidadaoPessoa);
     when(enderecoService.getEnderecoEntityById(1L)).thenReturn(endereco);
     when(solicitacaoMapper.toEntity(createDTO)).thenReturn(solicitacao);
     when(solicitacaoRepository.save(any())).thenReturn(solicitacao);

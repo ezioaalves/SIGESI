@@ -2,6 +2,7 @@ package com.sigesi.sigesi.solicitacoes.dtos;
 
 import com.sigesi.sigesi.arquivos.dtos.ArquivoResponseDTO;
 import com.sigesi.sigesi.enderecos.Endereco;
+import com.sigesi.sigesi.pessoas.dtos.PessoaResponseDTO;
 import com.sigesi.sigesi.solicitacoes.SolicitacaoAssunto;
 import com.sigesi.sigesi.solicitacoes.SolicitacaoStatus;
 import com.sigesi.sigesi.usuarios.Usuario;
@@ -38,8 +39,9 @@ public class SolicitacaoResponseDTO {
 
   private java.util.List<ArquivoResponseDTO> anexos;
 
-  @NotNull
   private Usuario autor;
+
+  private PessoaResponseDTO solicitante;
 
   @NotNull
   private Endereco local;

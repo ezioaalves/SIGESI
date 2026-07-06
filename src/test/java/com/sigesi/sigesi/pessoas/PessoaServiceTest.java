@@ -198,7 +198,27 @@ class PessoaServiceTest {
 
     assertNotNull(resultado);
     verify(pessoaMapper, times(1)).updateFromDto(updateDTO, pessoa);
+    verify(enderecoService, times(1)).getEnderecoEntityById(1L);
     verify(pessoaRepository, times(1)).save(pessoa);
+  }
+
+  @Test
+  @DisplayName("Deve usar enderecoId do DTO ao atualizar vínculo de endereço")
+  void testUpdatePessoaUsaEnderecoIdDoDto() {
+    Pessoa pessoa = mock(Pessoa.class);
+    PessoaUpdateDTO updateDTO = new PessoaUpdateDTO();
+    updateDTO.setEnderecoId(99L);
+    PessoaResponseDTO dto = mock(PessoaResponseDTO.class);
+
+    when(pessoaRepository.findById(1L)).thenReturn(Optional.of(pessoa));
+    when(enderecoService.getEnderecoEntityById(99L)).thenReturn(enderecoEntity);
+    when(pessoaRepository.save(pessoa)).thenReturn(pessoa);
+    when(pessoaMapper.toDto(pessoa)).thenReturn(dto);
+
+    PessoaResponseDTO resultado = pessoaService.updatePessoa(1L, updateDTO);
+
+    assertNotNull(resultado);
+    verify(enderecoService, times(1)).getEnderecoEntityById(99L);
   }
 
   @Test
@@ -234,7 +254,7 @@ class PessoaServiceTest {
 
     when(pessoaRepository.findById(1L)).thenReturn(Optional.of(pessoa));
 
-    Pessoa resultado = pessoaService.getPessoEntityById(1L);
+    Pessoa resultado = pessoaService.getPessoaEntityById(1L);
 
     assertNotNull(resultado);
     assertEquals(1L, resultado.getId());

@@ -2,6 +2,7 @@ package com.sigesi.sigesi.solicitacoes;
 
 import com.sigesi.sigesi.arquivos.Arquivo;
 import com.sigesi.sigesi.enderecos.Endereco;
+import com.sigesi.sigesi.pessoas.Pessoa;
 import com.sigesi.sigesi.usuarios.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -58,10 +59,13 @@ public class Solicitacao {
 // @formatter:on
   private java.util.List<Arquivo> anexos;
 
-  @NotNull(message = "Autor é obrigatório")
   @ManyToOne
-  @JoinColumn(name = "autor_id", nullable = false)
+  @JoinColumn(name = "autor_id")
   private Usuario autor;
+
+  @ManyToOne
+  @JoinColumn(name = "solicitante_id")
+  private Pessoa solicitante;
 
   @NotNull(message = "Local é obrigatório")
   @ManyToOne

@@ -63,7 +63,7 @@ public class GavetaService {
   }
 
   public GavetaResponseDTO createGaveta(GavetaCreateDTO gavetaDto) {
-    Pessoa ocupante = pessoaService.getPessoEntityById(gavetaDto.getOcupante());
+    Pessoa ocupante = pessoaService.getPessoaEntityById(gavetaDto.getOcupante());
     Jazigo jazigo = jazigoService.getJazigoEntityById(gavetaDto.getJazigo());
 
     Gaveta gaveta = gavetaMapper.toEntity(gavetaDto);
@@ -83,7 +83,7 @@ public class GavetaService {
     }
 
     if (gavetaDto.getOcupante() != null) {
-      Pessoa ocupante = pessoaService.getPessoEntityById(gavetaDto.getOcupante());
+      Pessoa ocupante = pessoaService.getPessoaEntityById(gavetaDto.getOcupante());
       gaveta.setOcupante(ocupante);
     }
 

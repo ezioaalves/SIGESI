@@ -4,6 +4,8 @@ import com.sigesi.sigesi.arquivos.ArquivoService;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
+import com.sigesi.sigesi.pessoas.Pessoa;
+import com.sigesi.sigesi.pessoas.PessoaService;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoUpdateDTO;
@@ -13,7 +15,9 @@ import com.sigesi.sigesi.usuarios.enums.Role;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Serviço para Solicitacao.
@@ -29,6 +33,9 @@ public class SolicitacaoService {
 
   @Autowired
   private UsuarioService usuarioService;
+
+  @Autowired
+  private PessoaService pessoaService;
 
   @Autowired
   private EnderecoService enderecoService;
@@ -58,11 +65,27 @@ public class SolicitacaoService {
   }
 
   public SolicitacaoResponseDTO createSolicitacao(SolicitacaoCreateDTO dto) {
-    Usuario autor = usuarioService.getUsuarioById(dto.getAutorId());
+    if (dto.getSolicitanteId() == null && dto.getAutorId() == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Solicitante é obrigatório");
+    }
+
+    Pessoa solicitante = null;
+    if (dto.getSolicitanteId() != null) {
+      solicitante = pessoaService.getPessoaEntityById(dto.getSolicitanteId());
+    }
+
+    Usuario autor = null;
+    if (dto.getAutorId() != null) {
+      autor = usuarioService.getUsuarioById(dto.getAutorId());
+    }
+
     Endereco local = enderecoService.getEnderecoEntityById(dto.getLocalId());
 
     Solicitacao entity = solicitacaoMapper.toEntity(dto);
     entity.setAutor(autor);
+    entity.setSolicitante(solicitante);
     entity.setLocal(local);
     entity.setStatus(SolicitacaoStatus.ABERTA);
 

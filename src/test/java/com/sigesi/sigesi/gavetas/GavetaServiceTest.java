@@ -123,7 +123,7 @@ class GavetaServiceTest {
     GavetaResponseDTO dto = mock(GavetaResponseDTO.class);
 
     when(jazigoService.getJazigoEntityById(1L)).thenReturn(jazigoEntity);
-    when(pessoaService.getPessoEntityById(1L)).thenReturn(pessoaEntity);
+    when(pessoaService.getPessoaEntityById(1L)).thenReturn(pessoaEntity);
     when(gavetaMapper.toEntity(gavetaCreateDTO)).thenReturn(gavetaEntity);
     when(gavetaRepository.save(gavetaEntity)).thenReturn(gavetaEntity);
     when(gavetaMapper.toDto(gavetaEntity)).thenReturn(dto);
@@ -132,7 +132,7 @@ class GavetaServiceTest {
 
     assertNotNull(resultado);
     verify(jazigoService, times(1)).getJazigoEntityById(1L);
-    verify(pessoaService, times(1)).getPessoEntityById(1L);
+    verify(pessoaService, times(1)).getPessoaEntityById(1L);
     verify(gavetaRepository, times(1)).save(gavetaEntity);
   }
 
@@ -148,7 +148,7 @@ class GavetaServiceTest {
 
     when(gavetaRepository.findById(1L)).thenReturn(Optional.of(gaveta));
     when(jazigoService.getJazigoEntityById(anyLong())).thenReturn(jazigoEntity);
-    when(pessoaService.getPessoEntityById(anyLong())).thenReturn(pessoaEntity);
+    when(pessoaService.getPessoaEntityById(anyLong())).thenReturn(pessoaEntity);
     when(gavetaRepository.save(gaveta)).thenReturn(gaveta);
     when(gavetaMapper.toDto(gaveta)).thenReturn(dto);
 
@@ -157,7 +157,7 @@ class GavetaServiceTest {
     assertNotNull(resultado);
     verify(gavetaRepository, times(1)).save(gaveta);
     verify(jazigoService, times(1)).getJazigoEntityById(2L);
-    verify(pessoaService, times(1)).getPessoEntityById(2L);
+    verify(pessoaService, times(1)).getPessoaEntityById(2L);
   }
 
   @Test

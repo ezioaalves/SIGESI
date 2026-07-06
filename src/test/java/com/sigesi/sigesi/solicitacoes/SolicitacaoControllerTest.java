@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigesi.sigesi.authentication.CustomOAuth2User;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
+import com.sigesi.sigesi.pessoas.dtos.PessoaResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoUpdateDTO;
@@ -79,6 +80,10 @@ class SolicitacaoControllerTest {
       Long id, SolicitacaoAssunto assunto, String body) {
     Usuario autor = Usuario.builder()
         .id(1L).email("test@test.com").build();
+    PessoaResponseDTO solicitante = new PessoaResponseDTO();
+    solicitante.setId(2L);
+    solicitante.setNome("Cidadao Teste");
+    solicitante.setCpf("12345678900");
     Endereco local = Endereco.builder()
         .id(1L).logradouro("Rua Test").build();
 
@@ -89,6 +94,7 @@ class SolicitacaoControllerTest {
         .body(body)
         .anexos(List.of())
         .autor(autor)
+        .solicitante(solicitante)
         .local(local)
         .build();
   }
@@ -99,7 +105,7 @@ class SolicitacaoControllerTest {
     dto.setAssunto(assunto);
     dto.setBody(body);
     dto.setAnexoIds(null);
-    dto.setAutorId(1L);
+    dto.setSolicitanteId(2L);
     dto.setLocalId(1L);
     return dto;
   }

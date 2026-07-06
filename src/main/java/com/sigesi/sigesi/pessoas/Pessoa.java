@@ -2,6 +2,8 @@ package com.sigesi.sigesi.pessoas;
 
 import com.sigesi.sigesi.enderecos.Endereco;
 
+import org.hibernate.envers.Audited;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,6 +28,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class Pessoa {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

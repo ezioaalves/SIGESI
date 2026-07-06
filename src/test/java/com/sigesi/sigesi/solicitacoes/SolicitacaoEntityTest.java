@@ -101,8 +101,8 @@ class SolicitacaoEntityTest {
   }
 
   @Test
-  @DisplayName("Deve lancar violacao quando autor e nulo")
-  void testAutorNulo() {
+  @DisplayName("Deve permitir autor nulo")
+  void testAutorNuloPermitido() {
     Solicitacao solicitacao = Solicitacao.builder()
         .body("Descricao")
         .local(local)
@@ -110,9 +110,7 @@ class SolicitacaoEntityTest {
         .build();
 
     Set<ConstraintViolation<Solicitacao>> violations = validator.validate(solicitacao);
-    assertFalse(violations.isEmpty());
-    assertTrue(violations.stream()
-        .anyMatch(v -> v.getPropertyPath().toString().equals("autor")));
+    assertTrue(violations.isEmpty());
   }
 
   @Test
