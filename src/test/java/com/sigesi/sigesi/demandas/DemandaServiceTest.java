@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -373,6 +374,30 @@ class DemandaServiceTest {
 
     verify(notificationPublisher, times(1))
         .publishDemandStatusChanged(updated, DemandaStatus.PENDENTE);
+  }
+
+  @Test
+  @DisplayName("Deve encerrar solicitacao vinculada quando demanda e concluida")
+  void testUpdateDemandaConcluidaEncerraSolicitacao() {
+    demanda.setStatus(DemandaStatus.EM_ANDAMENTO);
+    solicitacao.setStatus(SolicitacaoStatus.EM_ANDAMENTO);
+    DemandaUpdateDTO updateDTO = new DemandaUpdateDTO();
+    updateDTO.setStatus(DemandaStatus.CONCLUIDA);
+
+    doAnswer(invocation -> {
+      DemandaUpdateDTO dto = invocation.getArgument(0);
+      Demanda entity = invocation.getArgument(1);
+      entity.setStatus(dto.getStatus());
+      return null;
+    }).when(demandaMapper).updateFromDto(updateDTO, demanda);
+    when(demandaRepository.findById(1L)).thenReturn(Optional.of(demanda));
+    when(demandaRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(demandaMapper.toDto(any())).thenReturn(responseDTO);
+
+    DemandaResponseDTO resultado = demandaService.updateDemanda(1L, updateDTO);
+
+    assertNotNull(resultado);
+    assertEquals(SolicitacaoStatus.ENCERRADA, solicitacao.getStatus());
   }
 
   @Test

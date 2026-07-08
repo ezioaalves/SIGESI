@@ -25,12 +25,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.sigesi.sigesi.arquivos.Arquivo;
 import com.sigesi.sigesi.arquivos.ArquivoService;
+import com.sigesi.sigesi.config.ConflictException;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
 import com.sigesi.sigesi.pessoas.Pessoa;
 import com.sigesi.sigesi.pessoas.PessoaService;
 import com.sigesi.sigesi.pessoas.SexoEnum;
+import com.sigesi.sigesi.pessoas.dtos.PessoaCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoCreateDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoResponseDTO;
 import com.sigesi.sigesi.solicitacoes.dtos.SolicitacaoUpdateDTO;
@@ -175,6 +177,81 @@ class SolicitacaoServiceTest {
     assertNotNull(resultado);
     verify(solicitacaoRepository, times(1)).save(any());
     verify(usuarioService, never()).getUsuarioById(any());
+  }
+
+  @Test
+  @DisplayName("Deve usar pessoa vinculada ao usuario autenticado como solicitante")
+  void testCreateSolicitacaoUsaPessoaDoUsuarioAutenticado() {
+    cidadaoUser.setPessoa(cidadaoPessoa);
+    SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
+    createDTO.setAssunto(SolicitacaoAssunto.BURACO);
+    createDTO.setBody("Descricao do problema");
+    createDTO.setLocalId(1L);
+
+    when(enderecoService.getEnderecoEntityById(1L)).thenReturn(endereco);
+    when(solicitacaoMapper.toEntity(createDTO)).thenReturn(solicitacao);
+    when(solicitacaoRepository.save(any())).thenReturn(solicitacao);
+    when(solicitacaoMapper.toDto(any())).thenReturn(responseDTO);
+
+    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO, cidadaoUser);
+
+    assertNotNull(resultado);
+    assertEquals(cidadaoPessoa, solicitacao.getSolicitante());
+    verify(pessoaService, never()).getOrCreatePessoaEntityByCpf(any());
+  }
+
+  @Test
+  @DisplayName("Deve criar e vincular pessoa ao usuario autenticado na primeira solicitacao")
+  void testCreateSolicitacaoCriaEVinculaPessoaDoUsuarioAutenticado() {
+    PessoaCreateDTO pessoaDTO = new PessoaCreateDTO(
+        "Cidadao Teste",
+        "12345678900",
+        SexoEnum.MASCULINO,
+        1L);
+    SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
+    createDTO.setAssunto(SolicitacaoAssunto.BURACO);
+    createDTO.setBody("Descricao do problema");
+    createDTO.setSolicitante(pessoaDTO);
+    createDTO.setLocalId(1L);
+
+    when(pessoaService.getOrCreatePessoaEntityByCpf(pessoaDTO)).thenReturn(cidadaoPessoa);
+    when(usuarioService.findByPessoaId(4L)).thenReturn(Optional.empty());
+    when(usuarioService.vincularPessoa(cidadaoUser, cidadaoPessoa)).thenReturn(cidadaoUser);
+    when(enderecoService.getEnderecoEntityById(1L)).thenReturn(endereco);
+    when(solicitacaoMapper.toEntity(createDTO)).thenReturn(solicitacao);
+    when(solicitacaoRepository.save(any())).thenReturn(solicitacao);
+    when(solicitacaoMapper.toDto(any())).thenReturn(responseDTO);
+
+    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO, cidadaoUser);
+
+    assertNotNull(resultado);
+    assertEquals(cidadaoPessoa, solicitacao.getSolicitante());
+    verify(usuarioService, times(1)).vincularPessoa(cidadaoUser, cidadaoPessoa);
+  }
+
+  @Test
+  @DisplayName("Deve rejeitar CPF ja vinculado a outro usuario")
+  void testCreateSolicitacaoRejeitaPessoaVinculadaAOutroUsuario() {
+    Usuario outroUsuario = Usuario.builder().id(99L).role(Role.CIDADAO).build();
+    PessoaCreateDTO pessoaDTO = new PessoaCreateDTO(
+        "Cidadao Teste",
+        "12345678900",
+        SexoEnum.MASCULINO,
+        1L);
+    SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
+    createDTO.setAssunto(SolicitacaoAssunto.BURACO);
+    createDTO.setBody("Descricao do problema");
+    createDTO.setSolicitante(pessoaDTO);
+    createDTO.setLocalId(1L);
+
+    when(pessoaService.getOrCreatePessoaEntityByCpf(pessoaDTO)).thenReturn(cidadaoPessoa);
+    when(usuarioService.findByPessoaId(4L)).thenReturn(Optional.of(outroUsuario));
+
+    assertThrows(ConflictException.class,
+        () -> solicitacaoService.createSolicitacao(createDTO, cidadaoUser));
+
+    verify(usuarioService, never()).vincularPessoa(any(), any());
+    verify(solicitacaoRepository, never()).save(any());
   }
 
   @Test

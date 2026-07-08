@@ -57,14 +57,23 @@ public class PessoaService {
   public PessoaResponseDTO createPessoa(PessoaCreateDTO pessoaDTO) {
     this.checkPessoaConflict(pessoaDTO.getCpf());
 
+    Pessoa pessoa = createPessoaEntity(pessoaDTO);
+
+    return pessoaMapper.toDto(pessoa);
+  }
+
+  public Pessoa getOrCreatePessoaEntityByCpf(PessoaCreateDTO pessoaDTO) {
+    return pessoaRepository.findByCpf(pessoaDTO.getCpf())
+        .orElseGet(() -> createPessoaEntity(pessoaDTO));
+  }
+
+  private Pessoa createPessoaEntity(PessoaCreateDTO pessoaDTO) {
     Endereco endereco = enderecoService.getEnderecoEntityById(pessoaDTO.getEnderecoId());
 
     Pessoa pessoa = pessoaMapper.toEntity(pessoaDTO);
     pessoa.setEndereco(endereco);
 
-    pessoa = pessoaRepository.save(pessoa);
-
-    return pessoaMapper.toDto(pessoa);
+    return pessoaRepository.save(pessoa);
   }
 
   public PessoaResponseDTO updatePessoa(Long id, PessoaUpdateDTO pessoaDTO) {

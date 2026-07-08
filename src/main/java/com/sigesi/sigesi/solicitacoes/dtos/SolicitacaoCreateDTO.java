@@ -1,7 +1,9 @@
 package com.sigesi.sigesi.solicitacoes.dtos;
 
 import com.sigesi.sigesi.solicitacoes.SolicitacaoAssunto;
+import com.sigesi.sigesi.pessoas.dtos.PessoaCreateDTO;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -27,6 +29,9 @@ public class SolicitacaoCreateDTO {
   private Long autorId;
 
   private Long solicitanteId;
+
+  @Valid
+  private PessoaCreateDTO solicitante;
 
   @NotNull(message = "Local é obrigatório")
   private Long localId;

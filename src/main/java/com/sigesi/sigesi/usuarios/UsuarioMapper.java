@@ -16,6 +16,7 @@ public interface UsuarioMapper {
   @Mapping(target = "pictureUrl", ignore = true)
   @Mapping(target = "provider", ignore = true)
   @Mapping(target = "ativo", ignore = true)
+  @Mapping(target = "pessoa", ignore = true)
   @Mapping(target = "role", source = "role")
   void updateFromDto(UsuarioUpdateDTO dto, @MappingTarget Usuario entity);
 

@@ -1,6 +1,7 @@
 package com.sigesi.sigesi.solicitacoes;
 
 import com.sigesi.sigesi.arquivos.ArquivoService;
+import com.sigesi.sigesi.config.ConflictException;
 import com.sigesi.sigesi.config.NotFoundException;
 import com.sigesi.sigesi.enderecos.Endereco;
 import com.sigesi.sigesi.enderecos.EnderecoService;
@@ -85,6 +86,10 @@ public class SolicitacaoService {
       autor = usuarioService.getUsuarioById(dto.getAutorId());
     }
 
+    if (solicitante == null && autor != null) {
+      solicitante = resolveSolicitanteForAutor(dto, autor);
+    }
+
     Endereco local = enderecoService.getEnderecoEntityById(dto.getLocalId());
 
     Solicitacao entity = solicitacaoMapper.toEntity(dto);
@@ -102,6 +107,28 @@ public class SolicitacaoService {
 
     Solicitacao saved = solicitacaoRepository.save(entity);
     return solicitacaoMapper.toDto(saved);
+  }
+
+  private Pessoa resolveSolicitanteForAutor(SolicitacaoCreateDTO dto, Usuario autor) {
+    if (autor.getPessoa() != null) {
+      return autor.getPessoa();
+    }
+
+    if (dto.getSolicitante() == null) {
+      return null;
+    }
+
+    Pessoa pessoa = pessoaService.getOrCreatePessoaEntityByCpf(dto.getSolicitante());
+    if (pessoa.getId() != null) {
+      usuarioService.findByPessoaId(pessoa.getId())
+          .filter(usuario -> !usuario.getId().equals(autor.getId()))
+          .ifPresent(usuario -> {
+            throw new ConflictException("CPF já vinculado a outro usuário");
+          });
+    }
+
+    usuarioService.vincularPessoa(autor, pessoa);
+    return pessoa;
   }
 
   public SolicitacaoResponseDTO updateSolicitacao(Long id, SolicitacaoUpdateDTO dto) {

@@ -21,6 +21,7 @@ flowchart TD
     LOGIN --> FORM[Preenche solicitacao]
 
     FORM --> DADOS["Informa:
+    - Dados pessoais se ainda nao tiver Pessoa vinculada
     - Assunto (BURACO, ESGOTO, ILUMINACAO, LIMPEZA, OUTROS)
     - Descricao do problema
     - Local (endereco)"]
@@ -109,15 +110,10 @@ flowchart TD
     Evento: status_changed
     EM_ANDAMENTO -> CONCLUIDA"]
 
-    NOTIF_STATUS2 --> SOL_CONC["OPERADOR atualiza solicitacao
-    PATCH /api/solicitacoes/{id}
-    Status: CONCLUIDA"]
-
-    SOL_CONC --> ENCERRA["OPERADOR encerra solicitacao
-    PATCH /api/solicitacoes/{id}
+    NOTIF_STATUS2 --> SOL_CONC["Backend encerra solicitacao vinculada
     Status: ENCERRADA"]
 
-    ENCERRA --> FIM([Solicitacao encerrada com sucesso])
+    SOL_CONC --> FIM([Solicitacao encerrada com sucesso])
 
     %% ===== ESTILOS =====
     classDef cidadao fill:#4CAF50,color:#fff,stroke:#388E3C
@@ -128,7 +124,7 @@ flowchart TD
     classDef fim fill:#F44336,color:#fff,stroke:#C62828
 
     class START,LOGIN,FORM,DADOS,ANEXO,UPLOAD cidadao
-    class TRIAGEM,VALIDA,CRIA_DEM,DEF_DEM,REAVALIA,SOL_CONC,ENCERRA operador
+    class TRIAGEM,VALIDA,CRIA_DEM,DEF_DEM,REAVALIA,SOL_CONC operador
     class AGENTE_INICIA,EXEC,COMMENT,CONTINUA,FINALIZA agente
     class NOTIF_ASSIGN,NOTIF_STATUS1,NOTIF_STATUS2,NOTIF_CANCEL notif
     class CRIA_SOL,ANDAMENTO,REJEITADA,DEM_PENDENTE,DEM_CANCELADA status
@@ -144,7 +140,7 @@ stateDiagram-v2
     [*] --> ABERTA : Cidadao cria solicitacao
     ABERTA --> EM_ANDAMENTO : Operador aceita e cria demanda
     ABERTA --> REJEITADA : Operador rejeita
-    EM_ANDAMENTO --> CONCLUIDA : Demanda(s) concluida(s)
+    EM_ANDAMENTO --> ENCERRADA : Demanda concluida
     CONCLUIDA --> ENCERRADA : Operador encerra
     REJEITADA --> [*]
     ENCERRADA --> [*]
@@ -216,12 +212,13 @@ sequenceDiagram
     %% ===== CRIACAO DA SOLICITACAO =====
     rect rgb(232, 245, 233)
         Note over C, DB: Criacao da solicitacao
-        C->>FE: Preenche formulario (assunto, descricao, local, anexos)
+        C->>FE: Preenche formulario (dados pessoais se necessario, assunto, descricao, local, anexos)
         FE->>API: POST /api/solicitacoes/
-        API->>DB: Busca Usuario (autorId)
+        API->>DB: Usa Usuario autenticado
+        API->>DB: Reusa/cria Pessoa por CPF e vincula ao Usuario se necessario
         API->>DB: Busca Endereco (localId)
         API->>DB: Busca Arquivos (anexoIds)
-        API->>DB: Salva Solicitacao (status: ABERTA, data: now())
+        API->>DB: Salva Solicitacao (solicitante: Pessoa, status: ABERTA, data: now())
         DB-->>API: Solicitacao criada
         API-->>FE: SolicitacaoResponseDTO (201 Created)
         FE-->>C: Solicitacao registrada com sucesso
@@ -324,6 +321,7 @@ sequenceDiagram
         AG->>FE: Marca demanda como concluida
         FE->>API: PATCH /api/demandas/{id} (status: CONCLUIDA)
         API->>DB: Atualiza status para CONCLUIDA
+        API->>DB: Atualiza solicitacao vinculada para ENCERRADA
         DB-->>API: OK
         API->>MQ: Publica evento "status_changed" (EM_ANDAMENTO -> CONCLUIDA)
         MQ->>NS: Consome evento
@@ -332,22 +330,8 @@ sequenceDiagram
         FE-->>AG: Demanda concluida
     end
 
-    %% ===== ENCERRAMENTO DA SOLICITACAO =====
-    rect rgb(227, 242, 253)
-        Note over OP, DB: Encerramento da solicitacao
-        OP->>FE: Atualiza solicitacao
-        FE->>API: PATCH /api/solicitacoes/{id} (status: CONCLUIDA)
-        API->>DB: Atualiza status para CONCLUIDA
-        DB-->>API: OK
-        API-->>FE: SolicitacaoResponseDTO
-
-        OP->>FE: Encerra solicitacao
-        FE->>API: PATCH /api/solicitacoes/{id} (status: ENCERRADA)
-        API->>DB: Atualiza status para ENCERRADA
-        DB-->>API: OK
-        API-->>FE: SolicitacaoResponseDTO
-        FE-->>OP: Solicitacao encerrada
-    end
+    %% A solicitacao tambem pode ser atualizada manualmente pelo operador/admin,
+    %% mas concluir a demanda ja encerra a solicitacao vinculada.
 ```
 
 ## Eventos de notificacao (RabbitMQ)

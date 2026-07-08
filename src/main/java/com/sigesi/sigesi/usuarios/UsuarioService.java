@@ -1,10 +1,12 @@
 package com.sigesi.sigesi.usuarios;
 
 import com.sigesi.sigesi.config.NotFoundException;
+import com.sigesi.sigesi.pessoas.Pessoa;
 import com.sigesi.sigesi.usuarios.dtos.UsuarioUpdateDTO;
 import com.sigesi.sigesi.usuarios.enums.Role;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,15 @@ public class UsuarioService {
   public Usuario getUsuarioById(Long id) {
     return usuarioRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Usuário não encontrado com id " + id));
+  }
+
+  public Optional<Usuario> findByPessoaId(Long pessoaId) {
+    return usuarioRepository.findByPessoaId(pessoaId);
+  }
+
+  public Usuario vincularPessoa(Usuario usuario, Pessoa pessoa) {
+    usuario.setPessoa(pessoa);
+    return usuarioRepository.save(usuario);
   }
 
   public Usuario toggleUsuarioAtivo(Long id) {

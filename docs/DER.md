@@ -9,6 +9,7 @@ erDiagram
         String pictureUrl
         String provider
         Boolean ativo
+        Long pessoa_id FK
         Role role "CIDADAO | OPERADOR | AGENTE | ADMIN"
     }
 
@@ -57,6 +58,7 @@ erDiagram
         SolicitacaoAssunto assunto "BURACO | ESGOTO | ILUMINACAO | LIMPEZA | OUTROS"
         String body "NOT NULL, TEXT"
         Long autor_id FK "NOT NULL"
+        Long solicitante_id FK
         Long local_id FK "NOT NULL"
         SolicitacaoStatus status "ABERTA | EM_ANDAMENTO | CONCLUIDA | ENCERRADA | REJEITADA"
     }
@@ -131,9 +133,11 @@ erDiagram
     Gaveta }o--|| Jazigo : "pertence a"
     Gaveta }o--o| Pessoa : "ocupante"
     Pessoa }o--o| Endereco : "mora em"
+    Usuario }o--o| Pessoa : "perfil cidadao"
 
     %% Relacionamentos - Modulo Solicitacoes
     Solicitacao }o--|| Usuario : "autor"
+    Solicitacao }o--o| Pessoa : "solicitante"
     Solicitacao }o--|| Endereco : "local"
     Solicitacao ||--o{ solicitacao_arquivos : ""
     solicitacao_arquivos }o--|| Arquivo : ""

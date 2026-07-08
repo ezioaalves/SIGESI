@@ -149,6 +149,10 @@ public class DemandaService {
       resolveMateriais(dto.getMateriais(), demanda);
     }
 
+    if (dto.getStatus() == DemandaStatus.CONCLUIDA) {
+      demanda.getSolicitacao().setStatus(SolicitacaoStatus.ENCERRADA);
+    }
+
     Demanda updated = demandaRepository.save(demanda);
 
     // Publish notification event if status changed

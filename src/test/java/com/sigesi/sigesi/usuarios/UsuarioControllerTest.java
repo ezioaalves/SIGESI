@@ -2,6 +2,8 @@ package com.sigesi.sigesi.usuarios;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -17,6 +19,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sigesi.sigesi.authentication.CustomOAuth2User;
+import com.sigesi.sigesi.pessoas.Pessoa;
+import com.sigesi.sigesi.pessoas.SexoEnum;
+import com.sigesi.sigesi.usuarios.enums.Role;
 
 @WebMvcTest(controllers = UsuarioController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -41,10 +47,41 @@ class UsuarioControllerTest {
         .pictureUrl("https://example.com/pic.jpg")
         .provider("google")
         .ativo(ativo)
+        .role(Role.CIDADAO)
         .build();
   }
 
   // ===== GET =====
+  @Test
+  @DisplayName("GET /api/usuarios/me retorna pessoa vinculada")
+  void testMeRetornaPessoaVinculada() throws Exception {
+    Pessoa pessoa = Pessoa.builder()
+        .id(10L)
+        .nome("Cidadao Teste")
+        .cpf("12345678900")
+        .sexo(SexoEnum.MASCULINO)
+        .build();
+    Usuario usuario = usuarioMock(2L, "cidadao@example.com", "Cidadao Teste", true);
+    usuario.setPessoa(pessoa);
+
+    CustomOAuth2User principal = mock(CustomOAuth2User.class);
+    when(principal.getUser()).thenReturn(usuario);
+    org.springframework.security.core.Authentication auth = mock(
+        org.springframework.security.core.Authentication.class);
+    when(auth.getPrincipal()).thenReturn(principal);
+
+    mockMvc.perform(get("/api/usuarios/me")
+        .with(request -> {
+          request.setUserPrincipal(auth);
+          return request;
+        })
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(2)))
+        .andExpect(jsonPath("$.pessoa.id", is(10)))
+        .andExpect(jsonPath("$.pessoa.nome", is("Cidadao Teste")));
+  }
+
   @Test
   @DisplayName("GET /api/usuarios/ retorna 200 com lista vazia")
   void testListAllRetorna200ComListaVazia() throws Exception {

@@ -1,6 +1,7 @@
 package com.sigesi.sigesi.usuarios;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +31,14 @@ public class UsuarioController {
   @GetMapping("/me")
   public Object me(Authentication auth) {
     CustomOAuth2User user = (CustomOAuth2User) auth.getPrincipal();
-    return Map.of(
-        "id", user.getUser().getId(),
-        "name", user.getUser().getName(),
-        "email", user.getUser().getEmail(),
-        "role", user.getUser().getRole(),
-        "picture", user.getUser().getPictureUrl());
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("id", user.getUser().getId());
+    response.put("name", user.getUser().getName());
+    response.put("email", user.getUser().getEmail());
+    response.put("role", user.getUser().getRole());
+    response.put("picture", user.getUser().getPictureUrl());
+    response.put("pessoa", user.getUser().getPessoa());
+    return response;
   }
 
   @GetMapping("/")

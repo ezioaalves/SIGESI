@@ -181,6 +181,40 @@ class PessoaServiceTest {
   }
 
   @Test
+  @DisplayName("Deve reutilizar pessoa existente por CPF")
+  void testGetOrCreatePessoaEntityByCpfReutilizaPessoaExistente() {
+    Pessoa pessoa = Pessoa.builder()
+        .id(1L)
+        .nome("João Silva")
+        .cpf("123.456.789-00")
+        .sexo(SexoEnum.MASCULINO)
+        .build();
+
+    when(pessoaRepository.findByCpf("123.456.789-00")).thenReturn(Optional.of(pessoa));
+
+    Pessoa resultado = pessoaService.getOrCreatePessoaEntityByCpf(pessoaCreateDTO);
+
+    assertEquals(pessoa, resultado);
+    verify(pessoaRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Deve criar pessoa quando CPF ainda nao existe")
+  void testGetOrCreatePessoaEntityByCpfCriaPessoaNova() {
+    Pessoa pessoaEntity = mock(Pessoa.class);
+
+    when(pessoaRepository.findByCpf("123.456.789-00")).thenReturn(Optional.empty());
+    when(enderecoService.getEnderecoEntityById(1L)).thenReturn(enderecoEntity);
+    when(pessoaMapper.toEntity(pessoaCreateDTO)).thenReturn(pessoaEntity);
+    when(pessoaRepository.save(pessoaEntity)).thenReturn(pessoaEntity);
+
+    Pessoa resultado = pessoaService.getOrCreatePessoaEntityByCpf(pessoaCreateDTO);
+
+    assertEquals(pessoaEntity, resultado);
+    verify(pessoaRepository, times(1)).save(pessoaEntity);
+  }
+
+  @Test
   @DisplayName("Deve atualizar pessoa com sucesso")
   void testUpdatePessoaComSucesso() {
     Pessoa pessoa = mock(Pessoa.class);

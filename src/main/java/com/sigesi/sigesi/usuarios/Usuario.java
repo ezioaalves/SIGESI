@@ -2,6 +2,7 @@ package com.sigesi.sigesi.usuarios;
 
 import org.hibernate.envers.Audited;
 
+import com.sigesi.sigesi.pessoas.Pessoa;
 import com.sigesi.sigesi.usuarios.enums.Role;
 
 import jakarta.persistence.Column;
@@ -11,6 +12,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +35,10 @@ public class Usuario {
   private String pictureUrl;
   private String provider;
   private Boolean ativo;
+
+  @OneToOne
+  @JoinColumn(name = "pessoa_id")
+  private Pessoa pessoa;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
