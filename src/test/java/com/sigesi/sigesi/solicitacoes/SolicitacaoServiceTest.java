@@ -170,7 +170,7 @@ class SolicitacaoServiceTest {
     when(solicitacaoRepository.save(any())).thenReturn(solicitacao);
     when(solicitacaoMapper.toDto(any())).thenReturn(responseDTO);
 
-    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO);
+    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO, cidadaoUser);
 
     assertNotNull(resultado);
     verify(solicitacaoRepository, times(1)).save(any());
@@ -200,11 +200,12 @@ class SolicitacaoServiceTest {
   }
 
   @Test
-  @DisplayName("Deve rejeitar solicitacao sem solicitante nem autor legado")
+  @DisplayName("Deve rejeitar solicitacao sem autor")
   void testCreateSolicitacaoSemSolicitanteNemAutor() {
     SolicitacaoCreateDTO createDTO = new SolicitacaoCreateDTO();
     createDTO.setAssunto(SolicitacaoAssunto.BURACO);
     createDTO.setBody("Descricao");
+    createDTO.setSolicitanteId(4L);
     createDTO.setLocalId(1L);
 
     assertThrows(ResponseStatusException.class,
@@ -234,7 +235,7 @@ class SolicitacaoServiceTest {
     when(solicitacaoRepository.save(any())).thenReturn(solicitacao);
     when(solicitacaoMapper.toDto(any())).thenReturn(responseDTO);
 
-    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO);
+    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO, cidadaoUser);
 
     assertNotNull(resultado);
     verify(arquivoService, times(1)).getArquivoEntityById(10L);
@@ -256,7 +257,7 @@ class SolicitacaoServiceTest {
     when(solicitacaoRepository.save(any())).thenReturn(solicitacao);
     when(solicitacaoMapper.toDto(any())).thenReturn(responseDTO);
 
-    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO);
+    SolicitacaoResponseDTO resultado = solicitacaoService.createSolicitacao(createDTO, cidadaoUser);
 
     assertNotNull(resultado);
     verify(arquivoService, never()).getArquivoEntityById(any());

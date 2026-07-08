@@ -48,8 +48,9 @@ public class SolicitacaoController {
 
   @PostMapping("/")
   public ResponseEntity<SolicitacaoResponseDTO> createSolicitacao(
-      @Valid @RequestBody SolicitacaoCreateDTO dto) {
-    SolicitacaoResponseDTO result = solicitacaoService.createSolicitacao(dto);
+      @Valid @RequestBody SolicitacaoCreateDTO dto, Authentication auth) {
+    CustomOAuth2User user = (CustomOAuth2User) auth.getPrincipal();
+    SolicitacaoResponseDTO result = solicitacaoService.createSolicitacao(dto, user.getUser());
     return ResponseEntity.status(HttpStatus.CREATED).body(result);
   }
 

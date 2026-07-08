@@ -186,10 +186,15 @@ class SolicitacaoControllerTest {
     SolicitacaoResponseDTO responseDto = responseDto(
         1L, SolicitacaoAssunto.BURACO, "Novo Corpo");
 
-    given(service.createSolicitacao(any(SolicitacaoCreateDTO.class)))
+    given(service.createSolicitacao(
+        any(SolicitacaoCreateDTO.class), any(Usuario.class)))
         .willReturn(responseDto);
 
     mockMvc.perform(post("/api/solicitacoes/")
+        .with(request -> {
+          request.setUserPrincipal(mockAuth);
+          return request;
+        })
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(createDto)))
         .andExpect(status().isCreated())

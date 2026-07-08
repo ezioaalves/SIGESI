@@ -65,10 +65,14 @@ public class SolicitacaoService {
   }
 
   public SolicitacaoResponseDTO createSolicitacao(SolicitacaoCreateDTO dto) {
-    if (dto.getSolicitanteId() == null && dto.getAutorId() == null) {
+    return createSolicitacao(dto, null);
+  }
+
+  public SolicitacaoResponseDTO createSolicitacao(SolicitacaoCreateDTO dto, Usuario usuarioAutenticado) {
+    if (dto.getAutorId() == null && usuarioAutenticado == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Solicitante é obrigatório");
+          "Autor é obrigatório");
     }
 
     Pessoa solicitante = null;
@@ -76,8 +80,8 @@ public class SolicitacaoService {
       solicitante = pessoaService.getPessoaEntityById(dto.getSolicitanteId());
     }
 
-    Usuario autor = null;
-    if (dto.getAutorId() != null) {
+    Usuario autor = usuarioAutenticado;
+    if (autor == null && dto.getAutorId() != null) {
       autor = usuarioService.getUsuarioById(dto.getAutorId());
     }
 

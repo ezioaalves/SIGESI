@@ -60,7 +60,8 @@ public class Solicitacao {
   private java.util.List<Arquivo> anexos;
 
   @ManyToOne
-  @JoinColumn(name = "autor_id")
+  @NotNull(message = "Autor é obrigatório")
+  @JoinColumn(name = "autor_id", nullable = false)
   private Usuario autor;
 
   @ManyToOne
