@@ -33,8 +33,11 @@ import com.sigesi.sigesi.demandas.dtos.DemandaUpdateDTO;
 import com.sigesi.sigesi.materiais.Material;
 import com.sigesi.sigesi.materiais.MaterialService;
 import com.sigesi.sigesi.notifications.NotificationPublisher;
+import com.sigesi.sigesi.pessoas.Pessoa;
+import com.sigesi.sigesi.pessoas.SexoEnum;
 import com.sigesi.sigesi.solicitacoes.Solicitacao;
 import com.sigesi.sigesi.solicitacoes.SolicitacaoAssunto;
+import com.sigesi.sigesi.solicitacoes.SolicitacaoStatus;
 import com.sigesi.sigesi.solicitacoes.SolicitacaoService;
 import com.sigesi.sigesi.usuarios.Usuario;
 import com.sigesi.sigesi.usuarios.UsuarioService;
@@ -76,6 +79,7 @@ class DemandaServiceTest {
   void setUp() {
     solicitacao = Solicitacao.builder()
         .id(1L).body("Descricao").assunto(SolicitacaoAssunto.BURACO)
+        .status(SolicitacaoStatus.ABERTA)
         .build();
     responsavel = Usuario.builder()
         .id(2L).email("agent@test.com").name("Agente")
@@ -176,8 +180,87 @@ class DemandaServiceTest {
     DemandaResponseDTO resultado = demandaService.createDemanda(createDTO);
 
     assertNotNull(resultado);
+    assertEquals(SolicitacaoStatus.EM_ANDAMENTO, solicitacao.getStatus());
     verify(demandaRepository, times(1)).save(any());
     verify(notificationPublisher, never()).publishDemandAssigned(any());
+  }
+
+  @Test
+  @DisplayName("Deve criar demanda para solicitacao com solicitante pessoa")
+  void testCreateDemandaComSolicitantePessoa() {
+    Pessoa solicitante = Pessoa.builder()
+        .id(4L)
+        .nome("Cidadao Teste")
+        .cpf("12345678900")
+        .sexo(SexoEnum.MASCULINO)
+        .build();
+    solicitacao.setSolicitante(solicitante);
+    solicitacao.setStatus(SolicitacaoStatus.ABERTA);
+
+    DemandaCreateDTO createDTO = new DemandaCreateDTO();
+    createDTO.setSolicitacaoId(1L);
+    createDTO.setPrazo(LocalDate.now().plusDays(7));
+
+    Demanda novaDemanda = Demanda.builder()
+        .id(1L)
+        .solicitacao(solicitacao)
+        .prazo(createDTO.getPrazo())
+        .status(DemandaStatus.PENDENTE)
+        .build();
+
+    when(solicitacaoService.getSolicitacaoEntityById(1L)).thenReturn(solicitacao);
+    when(demandaMapper.toEntity(createDTO)).thenReturn(novaDemanda);
+    when(demandaRepository.save(any())).thenReturn(novaDemanda);
+    when(demandaMapper.toDto(any())).thenReturn(responseDTO);
+
+    DemandaResponseDTO resultado = demandaService.createDemanda(createDTO);
+
+    assertNotNull(resultado);
+    assertEquals(SolicitacaoStatus.EM_ANDAMENTO, solicitacao.getStatus());
+    verify(demandaRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("Deve criar demanda para solicitacao ja em andamento")
+  void testCreateDemandaComSolicitacaoEmAndamento() {
+    solicitacao.setStatus(SolicitacaoStatus.EM_ANDAMENTO);
+
+    DemandaCreateDTO createDTO = new DemandaCreateDTO();
+    createDTO.setSolicitacaoId(1L);
+    createDTO.setPrazo(LocalDate.now().plusDays(7));
+
+    Demanda novaDemanda = Demanda.builder()
+        .id(1L)
+        .solicitacao(solicitacao)
+        .prazo(createDTO.getPrazo())
+        .status(DemandaStatus.PENDENTE)
+        .build();
+
+    when(solicitacaoService.getSolicitacaoEntityById(1L)).thenReturn(solicitacao);
+    when(demandaMapper.toEntity(createDTO)).thenReturn(novaDemanda);
+    when(demandaRepository.save(any())).thenReturn(novaDemanda);
+    when(demandaMapper.toDto(any())).thenReturn(responseDTO);
+
+    demandaService.createDemanda(createDTO);
+
+    assertEquals(SolicitacaoStatus.EM_ANDAMENTO, solicitacao.getStatus());
+    verify(demandaRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("Deve rejeitar demanda para solicitacao em estado final")
+  void testCreateDemandaRejeitaSolicitacaoFinalizada() {
+    solicitacao.setStatus(SolicitacaoStatus.CONCLUIDA);
+
+    DemandaCreateDTO createDTO = new DemandaCreateDTO();
+    createDTO.setSolicitacaoId(1L);
+    createDTO.setPrazo(LocalDate.now().plusDays(7));
+
+    when(solicitacaoService.getSolicitacaoEntityById(1L)).thenReturn(solicitacao);
+
+    assertThrows(ResponseStatusException.class,
+        () -> demandaService.createDemanda(createDTO));
+    verify(demandaRepository, never()).save(any());
   }
 
   @Test

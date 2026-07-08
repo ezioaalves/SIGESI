@@ -50,6 +50,8 @@ main    -> https://sigesi.ezioalves.cloud
 
 O deploy usa GitHub Actions, Docker Hub, Docker Compose e o nginx existente na VPS como gateway publico HTTPS.
 
+Para correcoes solicitadas, valide localmente, envie a branch `develop` do repositorio afetado e teste o resultado em `https://sigesi-test.ezioalves.cloud`. Esse e o fluxo padrao; deploy direto na VPS fica reservado para pedidos explicitos.
+
 ## Comandos principais
 
 ```bash

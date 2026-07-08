@@ -21,6 +21,7 @@ import com.sigesi.sigesi.materiais.MaterialService;
 import com.sigesi.sigesi.notifications.NotificationPublisher;
 import com.sigesi.sigesi.solicitacoes.Solicitacao;
 import com.sigesi.sigesi.solicitacoes.SolicitacaoService;
+import com.sigesi.sigesi.solicitacoes.SolicitacaoStatus;
 import com.sigesi.sigesi.usuarios.Usuario;
 import com.sigesi.sigesi.usuarios.UsuarioService;
 
@@ -93,6 +94,7 @@ public class DemandaService {
   public DemandaResponseDTO createDemanda(DemandaCreateDTO dto) {
     Solicitacao solicitacao = solicitacaoService
         .getSolicitacaoEntityById(dto.getSolicitacaoId());
+    prepareSolicitacaoForDemanda(solicitacao);
 
     Demanda demanda = demandaMapper.toEntity(dto);
     demanda.setSolicitacao(solicitacao);
@@ -112,6 +114,17 @@ public class DemandaService {
     }
 
     return demandaMapper.toDto(saved);
+  }
+
+  private void prepareSolicitacaoForDemanda(Solicitacao solicitacao) {
+    SolicitacaoStatus status = solicitacao.getStatus();
+    if (status == SolicitacaoStatus.ABERTA) {
+      solicitacao.setStatus(SolicitacaoStatus.EM_ANDAMENTO);
+    } else if (status != SolicitacaoStatus.EM_ANDAMENTO) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Só é possível criar demanda para solicitação aberta ou em andamento");
+    }
   }
 
   /**

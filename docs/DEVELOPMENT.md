@@ -109,6 +109,11 @@ develop -> ambiente de teste
 main    -> producao
 ```
 
+Regra para correcoes solicitadas:
+
+- Depois de corrigir algo, rode os checks relevantes, faca commit/push da branch `develop` do repositorio afetado e deixe o GitHub Actions publicar em `https://sigesi-test.ezioalves.cloud`.
+- Use deploy direto na VPS apenas quando isso for pedido explicitamente.
+
 Fluxo recomendado:
 
 1. Trabalhe em branch de feature.
