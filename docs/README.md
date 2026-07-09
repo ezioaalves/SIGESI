@@ -12,6 +12,7 @@ Este diretorio e o ponto central de documentacao do projeto SIGESI. Ele descreve
 | [Deploy e operacao](DEPLOYMENT.md) | Para operar GitHub Actions, VPS, Docker Compose, nginx e secrets. |
 | [Proximos passos de deploy](NEXT_STEPS.md) | Para checklist direto de manutencao do deploy atual. |
 | [Fluxo de solicitacao](FLUXO_SOLICITACAO.md) | Para entender o ciclo de vida de solicitacoes e demandas. |
+| [Roteiro QA - Entradas do Frontend](QA_FRONTEND_INPUTS_2026-07-09.md) | Para executar a rodada manual de validacao de formularios, limites, persistencia e permissoes no ambiente de teste. |
 | [DER](DER.md) | Para consultar o modelo de dados. |
 | [Backlog de refatoracao](REFACTOR_BACKLOG.md) | Para priorizar melhorias estruturais sem mudar comportamento por acidente. |
 
