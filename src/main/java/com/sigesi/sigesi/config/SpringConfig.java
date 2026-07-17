@@ -35,7 +35,7 @@ public class SpringConfig {
             .requestMatchers("/api/gavetas/**").hasAnyRole("OPERADOR", "ADMIN")
             .requestMatchers("/api/documentos/**").hasAnyRole("OPERADOR", "ADMIN")
             .requestMatchers("/api/enderecos/**").hasAnyRole("CIDADAO", "AGENTE", "OPERADOR", "ADMIN")
-            .requestMatchers("/api/usuarios/me").authenticated()
+            .requestMatchers("/api/usuarios/me/**", "/api/usuarios/me").authenticated()
             .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
             .anyRequest().authenticated())
         .logout(logout -> logout

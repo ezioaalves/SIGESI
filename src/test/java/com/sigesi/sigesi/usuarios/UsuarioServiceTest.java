@@ -18,6 +18,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import com.sigesi.sigesi.config.ConflictException;
+import com.sigesi.sigesi.enderecos.EnderecoService;
+import com.sigesi.sigesi.enderecos.dtos.EnderecoCreateDTO;
+import com.sigesi.sigesi.enderecos.dtos.EnderecoResponseDTO;
+import com.sigesi.sigesi.pessoas.Pessoa;
+import com.sigesi.sigesi.pessoas.PessoaService;
+import com.sigesi.sigesi.pessoas.SexoEnum;
+import com.sigesi.sigesi.pessoas.dtos.PessoaResponseDTO;
+import com.sigesi.sigesi.usuarios.dtos.CadastroCidadaoDTO;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UsuarioService Tests")
@@ -25,6 +34,15 @@ class UsuarioServiceTest {
 
   @Mock
   private UsuarioRepository usuarioRepository;
+
+  @Mock
+  private UsuarioMapper usuarioMapper;
+
+  @Mock
+  private PessoaService pessoaService;
+
+  @Mock
+  private EnderecoService enderecoService;
 
   @InjectMocks
   private UsuarioService usuarioService;
@@ -176,5 +194,41 @@ class UsuarioServiceTest {
     assertNotNull(resultado);
     verify(usuarioRepository, times(1)).findByEmail("novo@example.com");
     verify(usuarioRepository, times(1)).save(any(Usuario.class));
+  }
+
+  @Test
+  @DisplayName("Deve concluir o primeiro cadastro do cidadão")
+  void testCadastrarPessoaComSucesso() {
+    CadastroCidadaoDTO dto = new CadastroCidadaoDTO(
+        "João Silva", "12345678900", SexoEnum.MASCULINO,
+        new EnderecoCreateDTO("Rua A", "10", "Centro", "Praça"));
+    EnderecoResponseDTO endereco = EnderecoResponseDTO.builder().id(5L).build();
+    Pessoa pessoa = Pessoa.builder().id(8L).nome("João Silva").cpf("12345678900")
+        .sexo(SexoEnum.MASCULINO).build();
+    PessoaResponseDTO response = new PessoaResponseDTO(
+        8L, "João Silva", "12345678900", "MASCULINO", null);
+
+    when(pessoaService.findPessoaEntityByCpf("12345678900")).thenReturn(Optional.empty());
+    when(enderecoService.createEndereco(dto.getEndereco())).thenReturn(endereco);
+    when(pessoaService.createPessoa(any())).thenReturn(response);
+    when(pessoaService.getPessoaEntityById(8L)).thenReturn(pessoa);
+    when(usuarioRepository.save(usuarioMock)).thenReturn(usuarioMock);
+
+    PessoaResponseDTO result = usuarioService.cadastrarPessoa(usuarioMock, dto);
+
+    assertEquals(8L, result.getId());
+    assertEquals(pessoa, usuarioMock.getPessoa());
+    verify(usuarioRepository).save(usuarioMock);
+  }
+
+  @Test
+  @DisplayName("Deve rejeitar usuário que já concluiu o cadastro")
+  void testCadastrarPessoaJaConfigurada() {
+    usuarioMock.setPessoa(Pessoa.builder().id(8L).build());
+    CadastroCidadaoDTO dto = new CadastroCidadaoDTO();
+
+    assertThrows(ConflictException.class,
+        () -> usuarioService.cadastrarPessoa(usuarioMock, dto));
+    verifyNoInteractions(enderecoService);
   }
 }

@@ -54,6 +54,14 @@ public class PessoaService {
     return pessoaMapper.toDto(pessoa);
   }
 
+  public java.util.Optional<Pessoa> findPessoaEntityByCpf(String cpf) {
+    return pessoaRepository.findByCpf(cpf);
+  }
+
+  public PessoaResponseDTO toResponseDto(Pessoa pessoa) {
+    return pessoaMapper.toDto(pessoa);
+  }
+
   public PessoaResponseDTO createPessoa(PessoaCreateDTO pessoaDTO) {
     this.checkPessoaConflict(pessoaDTO.getCpf());
 

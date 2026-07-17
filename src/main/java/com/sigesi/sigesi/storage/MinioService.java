@@ -51,7 +51,7 @@ public class MinioService {
         );
       }
     } catch (Exception e) {
-      throw new StorageException("Failed to initialize bucket: " + bucketName, e);
+      throw new StorageException("Não foi possível inicializar o armazenamento", e);
     }
   }
 
@@ -70,7 +70,7 @@ public class MinioService {
       );
       return objectName;
     } catch (Exception e) {
-      throw new StorageException("Failed to upload file: " + objectName, e);
+      throw new StorageException("Não foi possível enviar o arquivo", e);
     }
   }
 
@@ -86,7 +86,7 @@ public class MinioService {
               .build()
       );
     } catch (Exception e) {
-      throw new StorageException("Failed to download file: " + objectName, e);
+      throw new StorageException("Não foi possível baixar o arquivo", e);
     }
   }
 
@@ -104,7 +104,7 @@ public class MinioService {
               .build()
       );
     } catch (Exception e) {
-      throw new StorageException("Failed to generate presigned URL: " + objectName, e);
+      throw new StorageException("Não foi possível gerar o endereço para download", e);
     }
   }
 
@@ -120,7 +120,7 @@ public class MinioService {
               .build()
       );
     } catch (Exception e) {
-      throw new StorageException("Failed to delete file: " + objectName, e);
+      throw new StorageException("Não foi possível excluir o arquivo", e);
     }
   }
 

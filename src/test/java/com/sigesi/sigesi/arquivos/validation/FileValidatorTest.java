@@ -40,19 +40,55 @@ class FileValidatorTest {
 
     InvalidFileException ex = assertThrows(InvalidFileException.class,
         () -> FileValidator.validateFileSize(file));
-    assertTrue(ex.getMessage().contains("empty"));
+    assertTrue(ex.getMessage().contains("vazio"));
   }
 
   @Test
-  @DisplayName("Deve lancar excecao para arquivo maior que 10MB")
+  @DisplayName("Deve lancar excecao para arquivo maior que 5 MB")
   void testValidateFileSizeOversizedFile() {
-    byte[] largeContent = new byte[11 * 1024 * 1024];
+    byte[] largeContent = new byte[(5 * 1024 * 1024) + 1];
     MockMultipartFile file = new MockMultipartFile(
         "file", "large.jpg", "image/jpeg", largeContent);
 
     InvalidFileException ex = assertThrows(InvalidFileException.class,
         () -> FileValidator.validateFileSize(file));
-    assertTrue(ex.getMessage().contains("10MB"));
+    assertTrue(ex.getMessage().contains("5 MB"));
+  }
+
+  @Test
+  @DisplayName("Deve aceitar arquivo com exatamente 5 MB")
+  void testValidateFileSizeAtLimit() {
+    byte[] content = new byte[5 * 1024 * 1024];
+    MockMultipartFile file = new MockMultipartFile(
+        "file", "imagem grande.png", "image/png", content);
+
+    assertDoesNotThrow(() -> FileValidator.validateFile(file));
+  }
+
+  @Test
+  @DisplayName("Deve aceitar PNG, WEBP, DOC e DOCX")
+  void testValidateAdditionalAllowedFormats() {
+    assertDoesNotThrow(() -> FileValidator.validateFile(new MockMultipartFile(
+        "file", "imagem com espaços.png", "image/png", "png".getBytes())));
+    assertDoesNotThrow(() -> FileValidator.validateFile(new MockMultipartFile(
+        "file", "imagem.webp", "image/webp", "webp".getBytes())));
+    assertDoesNotThrow(() -> FileValidator.validateFile(new MockMultipartFile(
+        "file", "documento.doc", "application/msword", "doc".getBytes())));
+    assertDoesNotThrow(() -> FileValidator.validateFile(new MockMultipartFile(
+        "file", "documento.docx",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "docx".getBytes())));
+  }
+
+  @Test
+  @DisplayName("Deve rejeitar GIF e TIFF")
+  void testRejectForbiddenImageFormats() {
+    assertThrows(InvalidFileException.class,
+        () -> FileValidator.validateFile(new MockMultipartFile(
+            "file", "animacao.gif", "image/gif", "gif".getBytes())));
+    assertThrows(InvalidFileException.class,
+        () -> FileValidator.validateFile(new MockMultipartFile(
+            "file", "imagem.tiff", "image/tiff", "tiff".getBytes())));
   }
 
   @Test

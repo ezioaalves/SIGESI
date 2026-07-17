@@ -1,7 +1,9 @@
 package com.sigesi.sigesi.comentarios.dtos;
 
+import com.sigesi.sigesi.config.ValidationLimits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,5 +23,6 @@ public class ComentarioCreateDTO {
   private Long autorId;
 
   @NotBlank(message = "Texto é obrigatório")
+  @Size(max = ValidationLimits.LONG_TEXT, message = "O comentário deve ter no máximo 5.000 caracteres")
   private String texto;
 }

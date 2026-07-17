@@ -11,17 +11,18 @@ public final class FileValidator {
   private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
       "image/jpeg",
       "image/png",
-      "image/gif",
+      "image/webp",
       "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   );
 
   private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
-      "jpg", "jpeg", "png", "gif", "pdf", "doc", "docx"
+      "jpg", "jpeg", "png", "webp", "pdf", "doc", "docx"
   );
 
-  private static final long MAX_FILE_SIZE = 10L * 1024 * 1024; // 10MB
+  private static final long MAX_FILE_SIZE = 5L * 1024 * 1024; // 5 MiB
+  private static final int MAX_FILENAME_LENGTH = 255;
 
   private FileValidator() {
     // Utility class
@@ -32,10 +33,10 @@ public final class FileValidator {
    */
   public static void validateFileSize(MultipartFile file) {
     if (file.getSize() > MAX_FILE_SIZE) {
-      throw new InvalidFileException("File size exceeds 10MB limit");
+      throw new InvalidFileException("O arquivo excede o limite máximo de 5 MB");
     }
     if (file.isEmpty()) {
-      throw new InvalidFileException("File is empty");
+      throw new InvalidFileException("O arquivo está vazio");
     }
   }
 
@@ -45,7 +46,7 @@ public final class FileValidator {
   public static void validateContentType(MultipartFile file) {
     String contentType = file.getContentType();
     if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
-      throw new InvalidFileException("Invalid file type: " + contentType);
+      throw new InvalidFileException("Tipo de arquivo não permitido: " + contentType);
     }
   }
 
@@ -54,12 +55,12 @@ public final class FileValidator {
    */
   public static void validateFileExtension(String filename) {
     if (filename == null || filename.isEmpty()) {
-      throw new InvalidFileException("Filename is empty");
+      throw new InvalidFileException("O nome do arquivo está vazio");
     }
 
     String extension = getFileExtension(filename).toLowerCase();
     if (!ALLOWED_EXTENSIONS.contains(extension)) {
-      throw new InvalidFileException("Invalid file extension: " + extension);
+      throw new InvalidFileException("Extensão de arquivo não permitida: " + extension);
     }
   }
 
@@ -68,17 +69,21 @@ public final class FileValidator {
    */
   public static void validateFilename(String filename) {
     if (filename == null || filename.isEmpty()) {
-      throw new InvalidFileException("Filename is empty");
+      throw new InvalidFileException("O nome do arquivo está vazio");
+    }
+
+    if (filename.length() > MAX_FILENAME_LENGTH) {
+      throw new InvalidFileException("O nome do arquivo deve ter no máximo 255 caracteres");
     }
 
     // Check for path traversal
     if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
-      throw new InvalidFileException("Invalid filename: contains illegal characters");
+      throw new InvalidFileException("O nome do arquivo contém caracteres não permitidos");
     }
 
     // Check for null bytes
     if (filename.contains("\0")) {
-      throw new InvalidFileException("Invalid filename: contains null byte");
+      throw new InvalidFileException("O nome do arquivo contém um caractere nulo");
     }
   }
 

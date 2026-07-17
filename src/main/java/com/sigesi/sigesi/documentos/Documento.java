@@ -39,13 +39,13 @@ public class Documento {
   @Column(nullable = false)
   private LocalDate data;
 
-  @NotBlank(message = "Subject e obrigatorio")
+  @NotBlank(message = "Assunto é obrigatório")
   @Column(nullable = false)
   private String subject;
 
   private String honorifico;
 
-  @NotBlank(message = "Corpo e obrigatorio")
+  @NotBlank(message = "Corpo é obrigatório")
   @Column(nullable = false, columnDefinition = "TEXT")
   private String body;
 
@@ -55,11 +55,11 @@ public class Documento {
 
   private String portaria;
 
-  @NotBlank(message = "Assinante e obrigatorio")
+  @NotBlank(message = "Assinante é obrigatório")
   @Column(nullable = false)
   private String assinante;
 
-  @NotBlank(message = "Interessado e obrigatorio")
+  @NotBlank(message = "Interessado é obrigatório")
   @Column(nullable = false)
   private String interessado;
 

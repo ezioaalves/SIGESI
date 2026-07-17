@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigesi.sigesi.authentication.CustomOAuth2User;
 import com.sigesi.sigesi.pessoas.Pessoa;
 import com.sigesi.sigesi.pessoas.SexoEnum;
+import com.sigesi.sigesi.pessoas.dtos.PessoaResponseDTO;
 import com.sigesi.sigesi.usuarios.enums.Role;
 
 @WebMvcTest(controllers = UsuarioController.class)
@@ -80,6 +81,46 @@ class UsuarioControllerTest {
         .andExpect(jsonPath("$.id", is(2)))
         .andExpect(jsonPath("$.pessoa.id", is(10)))
         .andExpect(jsonPath("$.pessoa.nome", is("Cidadao Teste")));
+  }
+
+  @Test
+  @DisplayName("POST /api/usuarios/me/pessoa conclui cadastro do cidadão")
+  void testCadastrarPessoaAtual() throws Exception {
+    Usuario usuario = usuarioMock(2L, "cidadao@example.com", "Cidadao Teste", true);
+    CustomOAuth2User principal = mock(CustomOAuth2User.class);
+    when(principal.getUser()).thenReturn(usuario);
+    org.springframework.security.core.Authentication auth = mock(
+        org.springframework.security.core.Authentication.class);
+    when(auth.getPrincipal()).thenReturn(principal);
+    PessoaResponseDTO response = new PessoaResponseDTO(
+        10L, "Cidadao Teste", "12345678900", "MASCULINO", null);
+    given(usuarioService.cadastrarPessoa(org.mockito.ArgumentMatchers.eq(usuario),
+        org.mockito.ArgumentMatchers.any())).willReturn(response);
+
+    String body = """
+        {
+          "nome":"Cidadao Teste",
+          "cpf":"12345678900",
+          "sexo":"MASCULINO",
+          "endereco":{
+            "logradouro":"Rua A",
+            "numero":"10",
+            "bairro":"Centro",
+            "referencia":"Praça"
+          }
+        }
+        """;
+
+    mockMvc.perform(post("/api/usuarios/me/pessoa")
+        .with(request -> {
+          request.setUserPrincipal(auth);
+          return request;
+        })
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(body))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id", is(10)))
+        .andExpect(jsonPath("$.cpf", is("12345678900")));
   }
 
   @Test

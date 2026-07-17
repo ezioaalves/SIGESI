@@ -1,7 +1,9 @@
 package com.sigesi.sigesi.jazigos.dtos;
 
+import com.sigesi.sigesi.config.ValidationLimits;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -19,10 +21,12 @@ public class JazigoUpdateDTO {
   private Integer quadra;
 
   @Pattern(regexp = ".*\\S.*", message = "A rua não pode ser vazio ou composto apenas de espaços")
+  @Size(max = ValidationLimits.SHORT_TEXT, message = "Rua deve ter no máximo 150 caracteres")
   @Schema(description = "Nome da rua", example = "Dr. Pedro Silva")
   private String rua;
 
   @Pattern(regexp = ".*\\S.*", message = "O lote não pode ser vazio ou composto apenas de espaços")
+  @Size(max = ValidationLimits.CODE, message = "Lote deve ter no máximo 50 caracteres")
   @Schema(description = "Lote", example = "620")
   private String lote;
 }

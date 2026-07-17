@@ -47,7 +47,7 @@ public class ArquivoService {
     try {
       minioService.uploadFile(file, storageKey);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to upload file to storage", e);
+      throw new RuntimeException("Não foi possível enviar o arquivo para o armazenamento", e);
     }
 
     // Save metadata
@@ -70,7 +70,7 @@ public class ArquivoService {
       } catch (Exception cleanupEx) {
         // Log cleanup failure
       }
-      throw new RuntimeException("Failed to save file metadata", e);
+      throw new RuntimeException("Não foi possível salvar os dados do arquivo", e);
     }
 
     return arquivoMapper.toDto(arquivo);

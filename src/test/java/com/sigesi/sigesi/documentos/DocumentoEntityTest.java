@@ -40,7 +40,7 @@ class DocumentoEntityTest {
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
         .anyMatch(v -> v.getPropertyPath().toString().equals("subject")
-            && v.getMessage().equals("Subject e obrigatorio")));
+            && v.getMessage().equals("Assunto é obrigatório")));
   }
 
   @Test
@@ -58,7 +58,7 @@ class DocumentoEntityTest {
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
         .anyMatch(v -> v.getPropertyPath().toString().equals("subject")
-            && v.getMessage().equals("Subject e obrigatorio")));
+            && v.getMessage().equals("Assunto é obrigatório")));
   }
 
   @Test
@@ -76,7 +76,7 @@ class DocumentoEntityTest {
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
         .anyMatch(v -> v.getPropertyPath().toString().equals("subject")
-            && v.getMessage().equals("Subject e obrigatorio")));
+            && v.getMessage().equals("Assunto é obrigatório")));
   }
 
   @Test
@@ -94,7 +94,7 @@ class DocumentoEntityTest {
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
         .anyMatch(v -> v.getPropertyPath().toString().equals("body")
-            && v.getMessage().equals("Corpo e obrigatorio")));
+            && v.getMessage().equals("Corpo é obrigatório")));
   }
 
   @Test
@@ -112,7 +112,7 @@ class DocumentoEntityTest {
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
         .anyMatch(v -> v.getPropertyPath().toString().equals("body")
-            && v.getMessage().equals("Corpo e obrigatorio")));
+            && v.getMessage().equals("Corpo é obrigatório")));
   }
 
   @Test
@@ -130,7 +130,7 @@ class DocumentoEntityTest {
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
         .anyMatch(v -> v.getPropertyPath().toString().equals("assinante")
-            && v.getMessage().equals("Assinante e obrigatorio")));
+            && v.getMessage().equals("Assinante é obrigatório")));
   }
 
   @Test
@@ -148,7 +148,7 @@ class DocumentoEntityTest {
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
         .anyMatch(v -> v.getPropertyPath().toString().equals("interessado")
-            && v.getMessage().equals("Interessado e obrigatorio")));
+            && v.getMessage().equals("Interessado é obrigatório")));
   }
 
   @Test

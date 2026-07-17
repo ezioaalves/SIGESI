@@ -17,6 +17,10 @@ import com.sigesi.sigesi.authentication.CustomOAuth2User;
 import com.sigesi.sigesi.usuarios.dtos.UsuarioUpdateDTO;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import com.sigesi.sigesi.pessoas.dtos.PessoaResponseDTO;
+import com.sigesi.sigesi.usuarios.dtos.CadastroCidadaoDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -39,6 +43,14 @@ public class UsuarioController {
     response.put("picture", user.getUser().getPictureUrl());
     response.put("pessoa", user.getUser().getPessoa());
     return response;
+  }
+
+  @PostMapping("/me/pessoa")
+  public ResponseEntity<PessoaResponseDTO> cadastrarPessoaAtual(
+      Authentication auth, @Valid @RequestBody CadastroCidadaoDTO dto) {
+    CustomOAuth2User principal = (CustomOAuth2User) auth.getPrincipal();
+    PessoaResponseDTO pessoa = usuarioService.cadastrarPessoa(principal.getUser(), dto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(pessoa);
   }
 
   @GetMapping("/")
