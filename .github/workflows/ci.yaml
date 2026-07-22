@@ -1,10 +1,10 @@
-name: Integração de codigo
+name: Backend CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build-and-lint:
@@ -12,19 +12,20 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
 
     - name: Set up JDK 21
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: '21'
+        cache: maven
 
     - name: Build project
-      run: mvn clean compile
+      run: ./mvnw clean compile
 
     - name: Lint with Checkstyle
-      run: mvn checkstyle:check
+      run: ./mvnw checkstyle:check
 
     - name: Run tests
-      run: mvn test
+      run: ./mvnw test

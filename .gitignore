@@ -2,6 +2,10 @@
 # Java / Spring Boot .gitignore
 # =========================
 
+
+set-env.sh
+set-env.fish
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -87,6 +91,7 @@ bin/
 .mvn/wrapper/maven-wrapper.jar
 .mvn/wrapper/maven-wrapper.properties
 !/.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
 
 # Arquivos do Gradle
 .gradle/
@@ -96,9 +101,6 @@ build/
 
 # Arquivos de ambiente
 .env
-.env.*
-application-*.yml
-application-*.yaml
 application-*.properties
 
 # Cache de dependências
@@ -144,4 +146,3 @@ coverage/
 # Arquivos do Sonar e outros analisadores
 .sonar/
 report-task.txt
-

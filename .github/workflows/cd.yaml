@@ -41,7 +41,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "compose-prod.yaml,compose-test.yaml"
+          source: "compose-prod.yaml,compose-test.yaml,deploy/nginx.conf"
           target: "/root/pipeline/deploy-assets"
 
       - name: Deploy backend on VPS
@@ -112,7 +112,17 @@ jobs:
             docker compose -p "$COMPOSE_PROJECT" -f compose.yaml pull "$BACKEND_SERVICE"
             docker compose -p "$COMPOSE_PROJECT" -f compose.yaml up -d db rabbitmq minio "$BACKEND_SERVICE"
             docker network connect "${COMPOSE_PROJECT}_default" sigesi-nginx-1 2>/dev/null || true
-            docker exec sigesi-nginx-1 nginx -s reload
+
+            mkdir -p /root/SIGESI
+            cp /root/SIGESI/nginx.conf /root/SIGESI/nginx.conf.previous
+            cp /root/pipeline/deploy-assets/deploy/nginx.conf /root/SIGESI/nginx.conf
+            if docker exec sigesi-nginx-1 nginx -t; then
+              docker exec sigesi-nginx-1 nginx -s reload
+            else
+              cp /root/SIGESI/nginx.conf.previous /root/SIGESI/nginx.conf
+              docker exec sigesi-nginx-1 nginx -t
+              exit 1
+            fi
 
             if [ "${{ github.ref_name }}" = "main" ]; then
               docker rm -f notification-service sigesi-notification-db 2>/dev/null || true

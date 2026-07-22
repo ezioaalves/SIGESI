@@ -1,0 +1,15 @@
+-- Manual migration reference: convert demanda_material from a pure join table
+-- to the entity table shape used by DemandaMaterial.
+--
+-- The old demanda_material table was a pure join table (demanda_id + material_id composite PK).
+-- The new DemandaMaterial entity requires: id (serial PK), demanda_id, material_id, quantidade.
+--
+-- This project currently uses Hibernate ddl-auto=update and does not configure Flyway,
+-- so files in this folder are not applied automatically. Do not run destructive
+-- migration SQL unless you have a database backup and have chosen how to map
+-- existing rows to quantities.
+
+-- PostgreSQL example for an existing table that already has demanda_id/material_id
+-- but lacks id/quantidade:
+-- ALTER TABLE demanda_material ADD COLUMN IF NOT EXISTS id BIGSERIAL PRIMARY KEY;
+-- ALTER TABLE demanda_material ADD COLUMN IF NOT EXISTS quantidade INTEGER NOT NULL DEFAULT 1;
