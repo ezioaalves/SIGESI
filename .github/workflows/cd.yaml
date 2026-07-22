@@ -112,6 +112,7 @@ jobs:
             docker compose -p "$COMPOSE_PROJECT" -f compose.yaml pull "$BACKEND_SERVICE"
             docker compose -p "$COMPOSE_PROJECT" -f compose.yaml up -d db rabbitmq minio "$BACKEND_SERVICE"
             docker network connect "${COMPOSE_PROJECT}_default" sigesi-nginx-1 2>/dev/null || true
+            docker network connect sigesi_default sigesi-nginx-1 2>/dev/null || true
 
             mkdir -p /root/SIGESI
             cp /root/SIGESI/nginx.conf /root/SIGESI/nginx.conf.previous
