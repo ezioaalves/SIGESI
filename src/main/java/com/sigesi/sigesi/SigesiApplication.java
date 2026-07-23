@@ -9,12 +9,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
+import java.util.TimeZone;
+
 @SpringBootApplication
 public class SigesiApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SigesiApplication.class);
 
 	public static void main(String[] args) {
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
 		SpringApplication.run(SigesiApplication.class, args);
 	}
 
